@@ -1,0 +1,5 @@
+{
+    "buildCommand": "npm install -g pnpm@8.15.0 && pnpm install && next build",
+    "framework": "nextjs",
+    "installCommand": "echo \"skip\""
+}
