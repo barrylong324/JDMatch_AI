@@ -1,5 +1,5 @@
 {
-    "buildCommand": "npm install -g pnpm@8.15.0 && pnpm install && next build",
+    "buildCommand": "cd ../.. && pnpm install --frozen-lockfile --ignore-scripts && pnpm turbo run build --filter=@rag-ai/frontend",
     "framework": "nextjs",
     "installCommand": "echo \"skip\""
 }
