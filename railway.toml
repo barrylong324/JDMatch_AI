@@ -4,7 +4,7 @@ dockerfilePath = "apps/backend/Dockerfile"
 
 [deploy]
 startCommand = "node apps/backend/dist/main.js"
-healthcheckPath = "/api/health"
+healthcheckPath = "/api/knowledgeBases/getAllKnowledgeBases"
 healthcheckTimeout = 100
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
