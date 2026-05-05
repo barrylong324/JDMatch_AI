@@ -1,23 +1,32 @@
 // Load environment variables BEFORE any other imports
-import * as dotenv from 'dotenv';
-import { resolve, dirname } from 'path';
-dotenv.config({ path: resolve(__dirname, '../../../.env') });
+import * as dotenv from 'dotenv'
+import { resolve, dirname } from 'path'
+dotenv.config({ path: resolve(__dirname, '../../../.env') })
 
-// Set Prisma engine path to look for binaries in the dist folder
-const prismaEnginePath = resolve(__dirname, './query_engine-windows.dll.node');
-process.env.PRISMA_QUERY_ENGINE_LIBRARY = prismaEnginePath;
+// Dynamically locate the Prisma engine binary in dist folder
+const fs = require('fs')
+const engineFiles = fs.readdirSync(__dirname).filter((f) => f.endsWith('.node'))
+const engineFile = engineFiles.find(
+    (f) => f.includes('query_engine') || f.includes('libquery_engine'),
+)
+if (engineFile) {
+    process.env.PRISMA_QUERY_ENGINE_LIBRARY = resolve(__dirname, engineFile)
+    console.log(`✓ Using Prisma engine: ${engineFile}`)
+} else {
+    console.warn('⚠️ Prisma engine binary not found in dist, relying on default resolution')
+}
 
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import helmet from 'helmet';
-import { AppModule } from './app.module';
-import { config, getPort, isDevelopment } from '@rag-ai/config';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { NestFactory } from '@nestjs/core'
+import { ValidationPipe } from '@nestjs/common'
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
+import helmet from 'helmet'
+import { AppModule } from './app.module'
+import { config, getPort, isDevelopment } from '@rag-ai/config'
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter'
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor'
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule)
 
     // Security - configure Helmet to allow Swagger UI in development
     if (isDevelopment) {
@@ -27,16 +36,16 @@ async function bootstrap() {
                 contentSecurityPolicy: false,
                 crossOriginEmbedderPolicy: false,
             }),
-        );
+        )
     } else {
         // In production, use strict security policies
-        app.use(helmet());
+        app.use(helmet())
     }
 
     app.enableCors({
         origin: config.NEXT_PUBLIC_APP_URL,
         credentials: true,
-    });
+    })
 
     // Global validation pipe
     app.useGlobalPipes(
@@ -45,13 +54,13 @@ async function bootstrap() {
             forbidNonWhitelisted: true,
             transform: true,
         }),
-    );
+    )
 
     // Global exception filter
-    app.useGlobalFilters(new AllExceptionsFilter());
+    app.useGlobalFilters(new AllExceptionsFilter())
 
     // Global interceptors
-    app.useGlobalInterceptors(new LoggingInterceptor());
+    app.useGlobalInterceptors(new LoggingInterceptor())
 
     // Swagger documentation
     if (isDevelopment) {
@@ -70,9 +79,9 @@ async function bootstrap() {
                 },
                 'JWT-auth',
             )
-            .build();
+            .build()
 
-        const document = SwaggerModule.createDocument(app, swaggerConfig);
+        const document = SwaggerModule.createDocument(app, swaggerConfig)
         SwaggerModule.setup('api/docs', app, document, {
             explorer: true,
             swaggerOptions: {
@@ -91,16 +100,16 @@ async function bootstrap() {
         .swagger-ui .scheme-container { box-shadow: none; border-bottom: 1px solid #ccc }
       `,
             customJs: '',
-        });
+        })
     }
 
-    const port = getPort();
-    await app.listen(port);
+    const port = getPort()
+    await app.listen(port)
 
-    console.log(`🚀 API server running on http://localhost:${port}`);
+    console.log(`🚀 API server running on http://localhost:${port}`)
     if (isDevelopment) {
-        console.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
+        console.log(`📚 Swagger docs: http://localhost:${port}/api/docs`)
     }
 }
 
-bootstrap();
+bootstrap()
