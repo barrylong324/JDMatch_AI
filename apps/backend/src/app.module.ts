@@ -11,6 +11,7 @@ import { ChatModule } from './modules/rag-chat/chat.module'
 import { AigcNormalModule } from './modules/aigc-normal/aigc-normal.module'
 import { UploadsModule } from './modules/uploads/uploads.module'
 import { DocumentProcessingProcessor } from './processors/document.processor'
+import { HealthController } from './health.controller'
 import { config, getRateLimitTtl, getRateLimitMax } from '@rag-ai/config'
 
 @Module({
@@ -45,6 +46,7 @@ import { config, getRateLimitTtl, getRateLimitMax } from '@rag-ai/config'
         AigcNormalModule,
         UploadsModule,
     ],
+    controllers: [HealthController],
     providers: [DocumentProcessingProcessor],
 })
 export class AppModule {}
