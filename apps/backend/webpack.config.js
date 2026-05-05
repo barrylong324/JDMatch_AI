@@ -1,6 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-const nodeExternals = require('webpack-node-externals');
+const path = require('path')
+const fs = require('fs')
+const nodeExternals = require('webpack-node-externals')
 
 class CopyPrismaEnginePlugin {
     apply(compiler) {
@@ -11,33 +11,35 @@ class CopyPrismaEnginePlugin {
                     '../../node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client',
                 ),
                 path.join(__dirname, '../../node_modules/.prisma/client'),
-            ];
+            ]
 
-            let engineFile = null;
-            let srcPath = null;
+            let engineFile = null
+            let srcPath = null
 
             for (const basePath of searchPaths) {
                 if (fs.existsSync(basePath)) {
-                    const files = fs.readdirSync(basePath);
-                    const found = files.find((f) => f.endsWith('.dll.node'));
+                    const files = fs.readdirSync(basePath)
+                    const found = files.find(
+                        (f) => f.endsWith('.dll.node') || f.endsWith('.so.node'),
+                    )
                     if (found) {
-                        engineFile = found;
-                        srcPath = path.join(basePath, found);
-                        break;
+                        engineFile = found
+                        srcPath = path.join(basePath, found)
+                        break
                     }
                 }
             }
 
             if (engineFile && srcPath) {
-                const dest = path.join(compiler.outputPath, engineFile);
-                fs.copyFileSync(srcPath, dest);
-                console.log(`✓ Copied Prisma engine: ${engineFile}`);
+                const dest = path.join(compiler.outputPath, engineFile)
+                fs.copyFileSync(srcPath, dest)
+                console.log(`✓ Copied Prisma engine: ${engineFile}`)
             } else {
-                console.error('✗ Prisma engine file not found');
+                console.error('✗ Prisma engine file not found')
             }
 
-            callback();
-        });
+            callback()
+        })
     }
 }
 
@@ -71,5 +73,5 @@ module.exports = function (options) {
             },
         },
         plugins: [...(options.plugins || []), new CopyPrismaEnginePlugin()],
-    };
-};
+    }
+}
