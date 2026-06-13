@@ -34,7 +34,7 @@ export default function UploadPage() {
         try {
             const response = await getAllDocument(kbId)
             const { code, message, result } = response.data
-            if (code === 200) {
+            if (code === 0) {
                 setDocuments(result)
             } else {
                 console.error(message)
@@ -49,7 +49,7 @@ export default function UploadPage() {
         try {
             const response = await getAllKnowledgeBases()
             const { code, message, result } = response.data
-            if (code === 200) {
+            if (code === 0) {
                 const kbList = result
                 setKnowledgeBases(kbList)
                 if (kbList.length > 0) {
@@ -84,7 +84,7 @@ export default function UploadPage() {
         try {
             const response = await uploadFile(formData)
             const { code, message, result } = response.data;
-            if (code === 200) {
+            if (code === 0) {
                 toast.success(message)
                 setFile(null)
                 await loadDocuments(selectedKB)

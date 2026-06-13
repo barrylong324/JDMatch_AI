@@ -46,7 +46,7 @@ export default function ChatPage() {
         try {
             const response = await getAllKnowledgeBases()
             const { code, message, result } = response.data
-            if (code === 200) {
+            if (code === 0) {
                 setKnowledgeBases(result)
                 if (result.length > 0) {
                     setSelectedKB(result[0].id)
@@ -82,7 +82,7 @@ export default function ChatPage() {
             } as SendMessageDto
             const response = await getRagChatMessage(params)
             const { code, message, result } = response.data
-            if (code === 200) {
+            if (code === 0) {
                 const assistantMessage = result.answer || result.content
                 setMessages((prev) => [
                     ...prev,

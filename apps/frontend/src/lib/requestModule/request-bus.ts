@@ -57,13 +57,79 @@ export const getUserById = (params: string) => {
 }
 
 // 3.aigcChat模块
-// 获取AI对话
+// 获取AI对话（普通请求-响应）
 export const getAigcNormalChatMessage = (content: string) => {
     return service({
         url: '/aigcChat/message',
         method: 'post',
         data: { content },
     })
+}
+
+/**
+ * SSE 流式 AI 对话 — 返回异步生成器，逐个产出 SSE 数据块
+ * 用法: for await (const chunk of streamAigcNormalChat(content)) { ... }
+ */
+export async function* streamAigcNormalChat(
+    content: string,
+    conversationId?: string,
+): AsyncGenerator<SSEDataChunk, void, unknown> {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+
+    const response = await fetch(`${API_BASE_URL}/aigcChat/message/stream`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ content, conversationId }),
+    })
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || `HTTP ${response.status}`)
+    }
+
+    const reader = response.body?.getReader()
+    if (!reader) throw new Error('Stream not supported')
+
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        // 保留最后一个不完整的行
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+            const trimmed = line.trim()
+            if (!trimmed || !trimmed.startsWith('data: ')) continue
+
+            const dataStr = trimmed.slice(6) // 去掉 "data: "
+            if (dataStr === '[DONE]') return
+
+            try {
+                const chunk: SSEDataChunk = JSON.parse(dataStr)
+                yield chunk
+                if (chunk.type === 'error') return
+            } catch {
+                // 忽略解析失败的行
+            }
+        }
+    }
+}
+
+/** SSE 数据块类型（与后端 SSEChunk 对应） */
+export interface SSEDataChunk {
+    type: 'meta' | 'token' | 'error' | 'done'
+    content?: string
+    conversationId?: string
+    messageId?: string
 }
 
 // 获取所有对话

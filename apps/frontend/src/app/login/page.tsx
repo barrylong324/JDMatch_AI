@@ -28,7 +28,7 @@ export default function LoginPage() {
         try {
             const response = await contextRagLogin(formData.email, formData.password)
             const { code, message, result } = response.data
-            if (code === 200) {
+            if (code === 0) {
                 const { user, access_token } = result
 
                 login(user, access_token);

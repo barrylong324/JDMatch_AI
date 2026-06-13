@@ -75,18 +75,22 @@
         --sidebar-border: oklch(1 0 0 / 10%);
         --sidebar-ring: oklch(0.556 0 0);
     }
-  .theme {
+
+    .theme {
         --font-heading: var(--font-sans);
         --font-sans: var(--font-sans);
     }
-  * {
-    @apply border-border outline-ring/50;
+
+    * {
+        @apply border-border outline-ring/50;
     }
-  body {
-    @apply bg-background text-foreground;
+
+    body {
+        @apply bg-background text-foreground;
     }
-  html {
-    @apply font-sans;
+
+    html {
+        @apply font-sans;
     }
 }
 
@@ -97,5 +101,142 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+/* ============================================
+   Markdown 渲染样式 — 参照 ChatGPT 风格
+   ============================================ */
+
+@layer components {
+
+    /* 消息体中的 Markdown 容器 */
+    .chat-markdown {
+        @apply text-sm leading-relaxed text-gray-800;
+    }
+
+    /* 段落间距 */
+    .chat-markdown p {
+        @apply my-2 first:mt-0 last:mb-0;
+    }
+
+    /* 行内代码 */
+    .chat-markdown code:not(pre code) {
+        @apply bg-gray-200 text-gray-800 rounded px-1.5 py-0.5 text-[0.85em] font-mono;
+    }
+
+    /* 链接 */
+    .chat-markdown a {
+        @apply text-blue-600 underline underline-offset-2 hover:text-blue-800;
+    }
+
+    /* 列表 */
+    .chat-markdown ul,
+    .chat-markdown ol {
+        @apply my-2 pl-6;
+    }
+
+    .chat-markdown ul {
+        @apply list-disc;
+    }
+
+    .chat-markdown ol {
+        @apply list-decimal;
+    }
+
+    .chat-markdown li {
+        @apply my-1;
+    }
+
+    /* 引用块 */
+    .chat-markdown blockquote {
+        @apply border-l-4 border-gray-300 pl-4 my-2 italic text-gray-600;
+    }
+
+    /* 分割线 */
+    .chat-markdown hr {
+        @apply my-4 border-gray-200;
+    }
+
+    /* 标题 */
+    .chat-markdown h1 {
+        @apply text-xl font-bold my-3;
+    }
+
+    .chat-markdown h2 {
+        @apply text-lg font-bold my-3;
+    }
+
+    .chat-markdown h3 {
+        @apply text-base font-semibold my-2;
+    }
+
+    .chat-markdown h4 {
+        @apply text-sm font-semibold my-2;
+    }
+
+    /* ---- 代码块容器 (由 JSX + SyntaxHighlighter 渲染) ---- */
+    .code-block-wrapper {
+        @apply my-3 rounded-xl overflow-hidden border border-gray-200;
+    }
+
+    .code-block-header {
+        @apply flex items-center justify-between px-4 py-2 bg-[#2d2d2d] text-gray-300 text-xs font-mono;
+    }
+
+    .code-block-header .lang-label {
+        @apply text-gray-400 uppercase tracking-wider;
+    }
+
+    .code-block-header .copy-btn {
+        @apply flex items-center gap-1 px-2 py-1 rounded text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer;
+    }
+
+    .code-block-body {
+        @apply overflow-x-auto;
+    }
+
+    /* 覆盖 SyntaxHighlighter 内部的 pre/code 样式 */
+    .code-block-body pre {
+        @apply !m-0 !p-0 !bg-transparent;
+    }
+
+    /* ---- 表格样式 ---- */
+    .chat-markdown .table-wrapper {
+        @apply my-3 overflow-x-auto rounded-lg border border-gray-200;
+    }
+
+    .chat-markdown table {
+        @apply w-full text-sm border-collapse;
+    }
+
+    .chat-markdown thead {
+        @apply bg-gray-50 border-b-2 border-gray-200;
+    }
+
+    .chat-markdown th {
+        @apply px-4 py-2.5 text-left font-semibold text-gray-700 whitespace-nowrap;
+    }
+
+    .chat-markdown td {
+        @apply px-4 py-2.5 border-t border-gray-100 text-gray-700;
+    }
+
+    .chat-markdown tbody tr:nth-child(even) {
+        @apply bg-gray-50/50;
+    }
+
+    .chat-markdown tbody tr:hover {
+        @apply bg-gray-100/70;
+    }
+
+    /* 强调 */
+    .chat-markdown strong {
+        @apply font-semibold text-gray-900;
+    }
+
+    /* 图片 */
+    .chat-markdown img {
+        @apply rounded-lg my-2 max-w-full;
     }
 }
