@@ -46,7 +46,7 @@ export default function KnowledgeBasesPage() {
         try {
             const response = await getAllKnowledgeBases()
             const { code, message, result } = response.data
-            if (code === 200) {
+            if (code === 0) {
                 setKnowledgeBases(result)
             }
         } catch (error) {
@@ -68,7 +68,7 @@ export default function KnowledgeBasesPage() {
             }
             const response = actionType === 'add' ? await addKnowledgeBases(params as CreateKnowledgeBaseInput) : await editKnowledgeBases(params as UpdateKnowledgeBaseInput)
             const { code, message, result } = response.data
-            if (code === 200) {
+            if (code === 0) {
                 toast.success(message);
                 setShowCreateModal(false)
                 setNewKB({ id: '', name: '', description: '' });
@@ -96,7 +96,7 @@ export default function KnowledgeBasesPage() {
         try {
             const response = await delKnowledgeBases(id)
             const { code, message, result } = response.data
-            if (code === 200) {
+            if (code === 0) {
                 toast.success(message)
                 loadKnowledgeBases()
             }

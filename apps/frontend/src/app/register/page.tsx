@@ -25,7 +25,7 @@ export default function RegisterPage() {
         try {
             const response = await contextRagRegister(formData.email, formData.password, formData.name)
             const { code, message, result } = response.data
-            if (code === 200) {
+            if (code === 0) {
                 toast.success(message)
                 router.push('/login')
             }
