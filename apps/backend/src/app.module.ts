@@ -5,6 +5,7 @@ import { DatabaseModule } from './database/database.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { UsersModule } from './modules/users/users.module'
 import { MatchingModule } from './modules/matching/matching.module'
+import { HealthController } from './health.controller'
 import { config, getRateLimitTtl, getRateLimitMax } from '@jd-match/config'
 
 @Module({
@@ -31,5 +32,6 @@ import { config, getRateLimitTtl, getRateLimitMax } from '@jd-match/config'
         MatchingModule,
     ],
     providers: [],
+    controllers: [HealthController],
 })
 export class AppModule {}
