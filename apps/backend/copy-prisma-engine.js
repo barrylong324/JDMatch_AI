@@ -10,21 +10,31 @@ const searchPaths = [
     path.join(__dirname, '../../node_modules/.prisma/client'),
 ]
 
+// Map platform to preferred engine extension (order matters: try preferred first)
+const platformEngineOrder = {
+    win32: ['.dll.node', '.so.node', '.darwin.node'],
+    linux: ['.so.node', '.dll.node', '.darwin.node'],
+    darwin: ['.darwin.node', '.so.node', '.dll.node'],
+}
+
+const engineExtensions = platformEngineOrder[process.platform] || platformEngineOrder.linux
+
 let engineFile = null
 let srcPath = null
 
 for (const basePath of searchPaths) {
     if (fs.existsSync(basePath)) {
         const files = fs.readdirSync(basePath)
-        // Prefer Windows .dll.node over Linux .so.node
-        const dll = files.find((f) => f.endsWith('.dll.node'))
-        const so = files.find((f) => f.endsWith('.so.node'))
-        const found = dll || so
-        if (found) {
-            engineFile = found
-            srcPath = path.join(basePath, found)
-            break
+        // Try engines in platform-preferred order
+        for (const ext of engineExtensions) {
+            const found = files.find((f) => f.endsWith(ext))
+            if (found) {
+                engineFile = found
+                srcPath = path.join(basePath, found)
+                break
+            }
         }
+        if (engineFile) break
     }
 }
 
