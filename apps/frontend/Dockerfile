@@ -12,7 +12,7 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 
 # Build frontend
-RUN pnpm turbo run build --filter=@rag-ai/frontend
+RUN pnpm turbo run build --filter=@jd-match/frontend
 
 EXPOSE 3000
 

@@ -2,14 +2,14 @@ services:
   # PostgreSQL with pgvector extension
   postgres:
     image: ankane/pgvector:v0.5.1
-    container_name: rag_ai_postgres
+    container_name: jd_match_postgres
     restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: rag_ai_db
+      POSTGRES_DB: jd_match_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,12 +18,12 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - rag_ai_network
+      - jd_match_network
 
   # Redis for caching and task queue
   redis:
     image: redis:7-alpine
-    container_name: rag_ai_redis
+    container_name: jd_match_redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -36,7 +36,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - rag_ai_network
+      - jd_match_network
 
 volumes:
   postgres_data:
@@ -45,5 +45,5 @@ volumes:
     driver: local
 
 networks:
-  rag_ai_network:
+  jd_match_network:
     driver: bridge
