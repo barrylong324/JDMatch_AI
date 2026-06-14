@@ -1,11 +1,11 @@
-import { ChatOpenAI } from '@langchain/openai';
-import { config } from '@rag-ai/config';
+import { ChatOpenAI } from '@langchain/openai'
+import { config } from '@jd-match/config'
 
 // ============================================
 // LLM Configuration
 // ============================================
 
-let llmInstance: ChatOpenAI | null = null;
+let llmInstance: ChatOpenAI | null = null
 
 export function getLLM(temperature: number = 0.7): ChatOpenAI {
     if (!llmInstance) {
@@ -14,9 +14,9 @@ export function getLLM(temperature: number = 0.7): ChatOpenAI {
             modelName: config.OPENAI_MODEL,
             temperature,
             streaming: true, // Enable streaming for real-time responses
-        });
+        })
     }
-    return llmInstance;
+    return llmInstance
 }
 
 export function getStreamingLLM(temperature: number = 0.7): ChatOpenAI {
@@ -25,5 +25,5 @@ export function getStreamingLLM(temperature: number = 0.7): ChatOpenAI {
         modelName: config.OPENAI_MODEL,
         temperature,
         streaming: true,
-    });
+    })
 }

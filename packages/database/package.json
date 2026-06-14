@@ -1,5 +1,5 @@
 {
-    "name": "@rag-ai/database",
+    "name": "@jd-match/database",
     "version": "0.1.0",
     "private": true,
     "main": "./src/index.ts",

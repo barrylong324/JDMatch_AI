@@ -1,8 +1,8 @@
 {
-    "name": "rag-ai-knowledge-base",
-    "version": "0.1.0",
+    "name": "jd-match-ai",
+    "version": "0.2.0",
     "private": true,
-    "description": "Production-ready RAG AI Knowledge Base with Next.js + Nest.js",
+    "description": "JDMatch AI - AI-powered Resume & JD Matching Platform with Next.js + Nest.js",
     "scripts": {
         "build": "turbo run build",
         "dev": "turbo run dev",
