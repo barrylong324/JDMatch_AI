@@ -16,7 +16,10 @@ let srcPath = null
 for (const basePath of searchPaths) {
     if (fs.existsSync(basePath)) {
         const files = fs.readdirSync(basePath)
-        const found = files.find((f) => f.endsWith('.dll.node') || f.endsWith('.so.node'))
+        // Prefer Windows .dll.node over Linux .so.node
+        const dll = files.find((f) => f.endsWith('.dll.node'))
+        const so = files.find((f) => f.endsWith('.so.node'))
+        const found = dll || so
         if (found) {
             engineFile = found
             srcPath = path.join(basePath, found)

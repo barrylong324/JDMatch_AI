@@ -1,5 +1,5 @@
 {
-    "buildCommand": "cd ../.. && pnpm turbo run build --filter=@rag-ai/frontend",
+    "buildCommand": "cd ../.. && pnpm turbo run build --filter=@jd-match/frontend",
     "framework": "nextjs",
     "installCommand": "npm install -g pnpm@8.15.0 && cd ../.. && pnpm install --frozen-lockfile"
 }

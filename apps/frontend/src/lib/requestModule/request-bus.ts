@@ -1,10 +1,5 @@
 // 为请求绑定业务层，接入内部协议规范和接口文档，向外提供业务接口api
 import service from '@/lib/requestModule/request-base'
-import {
-    CreateKnowledgeBaseInput,
-    UpdateKnowledgeBaseInput,
-    SendMessageDto,
-} from '@rag-ai/shared-types'
 
 // 1.auth模块
 interface LoginOrRegister {
@@ -56,34 +51,33 @@ export const getUserById = (params: string) => {
     })
 }
 
-// 3.aigcChat模块
-// 获取AI对话（普通请求-响应）
-export const getAigcNormalChatMessage = (content: string) => {
+// 3.matching模块
+// 上传简历并匹配岗位
+export const uploadResumeAndMatch = (formData: FormData) => {
     return service({
-        url: '/aigcChat/message',
+        url: '/matching/analyze',
         method: 'post',
-        data: { content },
+        data: formData,
+        headers: { 'Content-Type': 'multipart/form-data' },
     })
 }
 
 /**
- * SSE 流式 AI 对话 — 返回异步生成器，逐个产出 SSE 数据块
- * 用法: for await (const chunk of streamAigcNormalChat(content)) { ... }
+ * SSE 流式匹配分析 — 返回异步生成器
+ * 用法: for await (const chunk of streamMatching(formData)) { ... }
  */
-export async function* streamAigcNormalChat(
-    content: string,
-    conversationId?: string,
+export async function* streamMatching(
+    formData: FormData,
 ): AsyncGenerator<SSEDataChunk, void, unknown> {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
 
-    const response = await fetch(`${API_BASE_URL}/aigcChat/message/stream`, {
+    const response = await fetch(`${API_BASE_URL}/matching/analyze/stream`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ content, conversationId }),
+        body: formData,
     })
 
     if (!response.ok) {
@@ -103,14 +97,13 @@ export async function* streamAigcNormalChat(
 
         buffer += decoder.decode(value, { stream: true })
         const lines = buffer.split('\n')
-        // 保留最后一个不完整的行
         buffer = lines.pop() || ''
 
         for (const line of lines) {
             const trimmed = line.trim()
             if (!trimmed || !trimmed.startsWith('data: ')) continue
 
-            const dataStr = trimmed.slice(6) // 去掉 "data: "
+            const dataStr = trimmed.slice(6)
             if (dataStr === '[DONE]') return
 
             try {
@@ -128,148 +121,31 @@ export async function* streamAigcNormalChat(
 export interface SSEDataChunk {
     type: 'meta' | 'token' | 'error' | 'done'
     content?: string
-    conversationId?: string
+    matchingId?: string
     messageId?: string
 }
 
-// 获取所有对话
-export const getAigcNormalChatAllMessage = () => {
+// 获取所有匹配记录（分页）
+export const getMatchingAllMessage = (page = 1, limit = 10) => {
     return service({
-        url: '/aigcChat/conversations',
+        url: '/matching/conversations',
+        method: 'get',
+        params: { page, limit },
+    })
+}
+
+// 获取匹配详情
+export const getMatchingById = (matchingId: string) => {
+    return service({
+        url: `/matching/conversations/${matchingId}`,
         method: 'get',
     })
 }
 
-// 获取会话中的消息
-export const getAigcNormalChatIdMessage = (conversationId: string) => {
+// 删除匹配记录
+export const delMatchingMessage = (matchingId: string) => {
     return service({
-        url: `/aigcChat/conversations/messages/${conversationId}`,
-        method: 'get',
-    })
-}
-
-// 删除对话
-export const delAigcNormalChatMessage = (conversationId: string) => {
-    return service({
-        url: `/aigcChat/conversations/${conversationId}`,
+        url: `/matching/conversations/${matchingId}`,
         method: 'delete',
-    })
-}
-
-// 4.ragChat模块
-// 获取ragAI对话
-export const getRagChatMessage = (params: SendMessageDto) => {
-    return service({
-        url: '/ragChat/message',
-        method: 'post',
-        data: params,
-    })
-}
-
-// 获取所有rag对话
-export const getRagChatAllMessage = (params: string) => {
-    return service({
-        url: '/ragChat/conversations',
-        method: 'get',
-        params,
-    })
-}
-
-// 获取rag会话中的消息
-export const getRagChatIdMessage = (conversationId: string) => {
-    return service({
-        url: `/ragChat/conversations/messages/${conversationId}`,
-        method: 'get',
-    })
-}
-
-// 删除rag对话
-export const delRagChatMessage = (conversationId: string) => {
-    return service({
-        url: `/ragChat/conversations/${conversationId}`,
-        method: 'del',
-    })
-}
-
-// 5.knowledge-bases模块
-// 批量获取知识库
-export const getAllKnowledgeBases = () => {
-    return service({
-        url: '/knowledgeBases/getAllKnowledgeBases',
-        method: 'get',
-    })
-}
-
-// 根据知识库id查询知识库
-export const getKnowledgeBasesById = (params: string) => {
-    return service({
-        url: '/knowledgeBases/getAllKnowledgeBases',
-        method: 'get',
-        params,
-    })
-}
-
-// 新增知识库
-export const addKnowledgeBases = (param: CreateKnowledgeBaseInput) => {
-    return service({
-        url: '/knowledgeBases/addKnowledgeBases',
-        method: 'post',
-        data: param,
-    })
-}
-
-// 编辑知识库
-export const editKnowledgeBases = (param: UpdateKnowledgeBaseInput) => {
-    return service({
-        url: '/knowledgeBases/updateKnowledgeBases',
-        method: 'post',
-        data: param,
-    })
-}
-
-// 删除知识库
-export const delKnowledgeBases = (id: string) => {
-    return service({
-        url: `/knowledgeBases/delKnowledgeBases/${id}`,
-        method: 'delete',
-    })
-}
-
-// 6.document模块
-// 批量获取文档
-export const getAllDocument = (kbId: string) => {
-    return service({
-        url: '/documents/allDoc',
-        method: 'get',
-        params: { kbId },
-    })
-}
-
-// 根据文档id查询文档
-export const getDocumentById = (id: string) => {
-    return service({
-        url: `/documents/allDoc/${id}`,
-        method: 'get',
-    })
-}
-
-// 根据文档id删除文档
-export const delDocumentById = (id: string) => {
-    return service({
-        url: `/documents/allDoc/${id}`,
-        method: 'delete',
-    })
-}
-
-// 7.upload模块
-// 文件上传
-export const uploadFile = (formData: FormData) => {
-    return service({
-        url: '/upload',
-        method: 'post',
-        data: formData,
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        },
     })
 }

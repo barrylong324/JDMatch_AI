@@ -1,8 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { BookOpen, MessageSquare, MessagesSquare, Upload, Settings, Home } from 'lucide-react';
+import { Link, usePathname } from '@/navigation';
+import { Home, Target, History, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export default function Sidebar() {
@@ -11,10 +10,8 @@ export default function Sidebar() {
 
     const navigation = [
         { name: t('dashboard'), href: '/dashboard', icon: Home },
-        { name: t('knowledgeBases'), href: '/dashboard/knowledge-bases', icon: BookOpen },
-        { name: t('chat'), href: '/dashboard/chat', icon: MessagesSquare },
-        { name: t('aigcChat'), href: '/dashboard/aigc-chat', icon: MessageSquare },
-        { name: t('upload'), href: '/dashboard/upload', icon: Upload },
+        { name: t('matching'), href: '/dashboard/matching', icon: Target },
+        { name: t('history'), href: '/dashboard/history', icon: History },
         { name: t('settings'), href: '/dashboard/settings', icon: Settings },
     ];
 
@@ -24,7 +21,7 @@ export default function Sidebar() {
                 <div className="flex flex-col h-0 flex-1 bg-black">
                     <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
                         <div className="flex items-center flex-shrink-0 px-4">
-                            <h1 className="text-white text-xl font-bold">Contexta RAG</h1>
+                            <h1 className="text-white text-xl font-bold">JDMatch AI</h1>
                         </div>
                         <nav className="mt-5 flex-1 px-2 space-y-1">
                             {navigation.map((item) => {

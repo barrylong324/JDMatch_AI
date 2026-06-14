@@ -15,7 +15,7 @@ export default function LanguageSwitcher() {
     const pathname = usePathname();
 
     const handleLanguageChange = (newLocale: string) => {
-        // 替换URL中的语言前缀
+        // 所有语言都带前缀 (/zh, /en)，直接替换即可
         const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
         router.push(newPathname);
     };
@@ -34,9 +34,8 @@ export default function LanguageSwitcher() {
                         <button
                             key={lang.code}
                             onClick={() => handleLanguageChange(lang.code)}
-                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 ${
-                                locale === lang.code ? 'bg-gray-50 font-medium' : ''
-                            }`}
+                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 ${locale === lang.code ? 'bg-gray-50 font-medium' : ''
+                                }`}
                         >
                             <span>{lang.flag}</span>
                             <span>{lang.name}</span>

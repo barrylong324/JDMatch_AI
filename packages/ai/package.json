@@ -1,5 +1,5 @@
 {
-    "name": "@rag-ai/ai",
+    "name": "@jd-match/ai",
     "version": "0.1.0",
     "private": true,
     "main": "./src/index.ts",
@@ -9,16 +9,16 @@
     },
     "dependencies": {
         "@langchain/deepseek": "^1.0.24",
-        "@rag-ai/config": "workspace:*",
-        "@rag-ai/shared-types": "workspace:*",
+        "@jd-match/config": "workspace:*",
+        "@jd-match/shared-types": "workspace:*",
         "langchain": "^0.1.37",
         "zod": "^3.22.4"
     },
     "devDependencies": {
         "@langchain/core": "^1.1.40",
         "@langchain/openai": "^1.4.4",
-        "@rag-ai/config": "workspace:*",
-        "@rag-ai/database": "workspace:*",
+        "@jd-match/config": "workspace:*",
+        "@jd-match/database": "workspace:*",
         "eslint": "^8.56.0",
         "typescript": "^5.3.3"
     }

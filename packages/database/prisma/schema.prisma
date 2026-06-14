@@ -20,30 +20,20 @@ model User {
   name          String?
   image         String?
   role          Role      @default(USER)
-  
+
   accounts      Account[]
   sessions      Session[]
-  
-  // Owned resources
-  knowledgeBases KnowledgeBase[] @relation("KnowledgeBaseOwner")
-  uploadedDocuments Document[]
-  
-  // Collaborations
-  collaborations Collaboration[]
-  
-  // Conversations
-  conversations Conversation[]
 
-  // AIGC Normal Conversations
-  aigcConversations AigcConversation[]
+  // Matching Conversations (简历-岗位匹配分析)
+  matchingConversations AigcConversation[]
 
   // API Keys
   apiKeys       ApiKey[]
-  
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
-  
+
   @@index([email])
   @@map("users")
 }
@@ -85,164 +75,8 @@ model Session {
 }
 
 // ============================================
-// Knowledge Base
+// Matching Conversations (简历-岗位匹配分析)
 // ============================================
-
-model KnowledgeBase {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  icon        String?  // URL or emoji
-  isPublic    Boolean  @default(false)
-  ownerId     String
-  
-  owner       User           @relation("KnowledgeBaseOwner", fields: [ownerId], references: [id])
-  documents   Document[]
-  collaborations Collaboration[]
-  conversations Conversation[]
-  aigcConversations AigcConversation[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
-  
-  @@index([ownerId])
-  @@map("knowledge_bases")
-}
-
-model Collaboration {
-  id              String   @id @default(uuid())
-  userId          String
-  knowledgeBaseId String
-  role            CollaborationRole @default(VIEWER)
-  
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  knowledgeBase KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  @@unique([userId, knowledgeBaseId])
-  @@index([knowledgeBaseId])
-  @@map("collaborations")
-}
-
-enum CollaborationRole {
-  OWNER
-  EDITOR
-  VIEWER
-}
-
-// ============================================
-// Documents
-// ============================================
-
-model Document {
-  id              String   @id @default(uuid())
-  title           String
-  description     String?
-  fileName        String
-  fileType        String   // pdf, docx, txt, md, html
-  fileSize        Int      // in bytes
-  storageKey      String   // S3/R2 key
-  mimeType        String
-  
-  knowledgeBaseId String
-  knowledgeBase   KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
-  
-  uploadedById    String
-  uploadedBy      User     @relation(fields: [uploadedById], references: [id])
-  
-  status          DocumentStatus @default(PENDING)
-  chunks          DocumentChunk[]
-  
-  tags            String[] // Array of tags
-  metadata        Json?    // Additional metadata
-  
-  processingStartedAt DateTime?
-  processingCompletedAt DateTime?
-  processingError   String?
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  deletedAt       DateTime?
-  
-  @@index([knowledgeBaseId])
-  @@index([uploadedById])
-  @@index([status])
-  @@map("documents")
-}
-
-enum DocumentStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
-}
-
-model DocumentChunk {
-  id         String   @id @default(uuid())
-  documentId String
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  
-  content    String   @db.Text
-  embedding  Unsupported("vector(1536)")? // pgvector, 1536 dimensions for Ada-002
-  
-  chunkIndex Int
-  tokenCount Int
-  
-  metadata   Json?    // Page number, section title, etc.
-  
-  createdAt  DateTime @default(now())
-  
-  @@index([documentId])
-  @@map("document_chunks")
-}
-
-// ============================================
-// Conversations & Messages
-// ============================================
-
-model Conversation {
-  id              String   @id @default(uuid())
-  title           String?
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  knowledgeBaseId String?
-  knowledgeBase   KnowledgeBase? @relation(fields: [knowledgeBaseId], references: [id])
-  
-  messages        Message[]
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  deletedAt       DateTime?
-  
-  @@index([userId])
-  @@index([knowledgeBaseId])
-  @@map("conversations")
-}
-
-model Message {
-  id             String   @id @default(uuid())
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  
-  role           MessageRole
-  content        String   @db.Text
-  
-  // For AI messages: retrieved context
-  sources        Json?    // Array of {chunkId, documentId, score, content}
-  
-  // Feedback
-  rating         MessageRating?
-  feedback       String?
-  
-  createdAt      DateTime @default(now())
-  
-  @@index([conversationId])
-  @@map("messages")
-}
 
 enum MessageRole {
   USER
@@ -255,18 +89,16 @@ enum MessageRating {
   DOWNVOTE
 }
 
-// ============================================
-// AIGC Normal Chat Conversations
-// ============================================
+enum InterviewStatus {
+  IN_PROGRESS
+  COMPLETED
+}
 
 model AigcConversation {
   id          String   @id @default(uuid())
   title       String?
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  knowledgeBaseId String?
-  knowledgeBase  KnowledgeBase? @relation(fields: [knowledgeBaseId], references: [id])
 
   messages   AigcMessage[]
 
@@ -275,8 +107,7 @@ model AigcConversation {
   deletedAt  DateTime?
 
   @@index([userId])
-  @@index([knowledgeBaseId])
-  @@map("aigc_conversations")
+  @@map("matching_conversations")
 }
 
 model AigcMessage {
@@ -287,14 +118,14 @@ model AigcMessage {
   role           MessageRole
   content        String   @db.Text
 
-  sources        Json?    // Retrieved context for AI responses
+  sources        Json?
   rating         MessageRating?
   feedback       String?
 
   createdAt      DateTime @default(now())
 
   @@index([conversationId])
-  @@map("aigc_messages")
+  @@map("matching_messages")
 }
 
 // ============================================

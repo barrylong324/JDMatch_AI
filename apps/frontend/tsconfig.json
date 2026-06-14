@@ -18,8 +18,7 @@
             }
         ],
         "paths": {
-            // 在前端tsconfig.json中添加了@rag-ai/*路径映射，让TypeScript先匹配@rag-ai/*开头的包，再匹配@/*：
-            "@rag-ai/*": ["../../packages/shared-types/src/*", "../../packages/*"],
+            "@jd-match/*": ["../../packages/shared-types/src/*", "../../packages/*"],
             "@/*": ["./src/*"]
         }
     },

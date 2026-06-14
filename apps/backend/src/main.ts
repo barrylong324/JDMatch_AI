@@ -21,7 +21,7 @@ import { ValidationPipe } from '@nestjs/common'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import helmet from 'helmet'
 import { AppModule } from './app.module'
-import { config, getPort, isDevelopment } from '@rag-ai/config'
+import { config, getPort, isDevelopment } from '@jd-match/config'
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter'
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor'
 
@@ -65,9 +65,9 @@ async function bootstrap() {
     // Swagger documentation
     if (isDevelopment) {
         const swaggerConfig = new DocumentBuilder()
-            .setTitle('RAG AI Knowledge Base API')
-            .setDescription('API documentation for RAG AI Knowledge Base application')
-            .setVersion('0.1.0')
+            .setTitle('JDMatch AI API')
+            .setDescription('API documentation for JDMatch AI - Resume & JD Matching Platform')
+            .setVersion('0.2.0')
             .addBearerAuth(
                 {
                     type: 'http',
@@ -93,7 +93,7 @@ async function bootstrap() {
                 tagsSorter: 'alpha',
                 operationsSorter: 'alpha',
             },
-            customSiteTitle: 'RAG AI API Documentation',
+            customSiteTitle: 'JDMatch AI API Documentation',
             customCss: `
         .swagger-ui .topbar { display: none }
         .swagger-ui .info { margin: 20px 0 }

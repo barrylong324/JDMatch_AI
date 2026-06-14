@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuthStore } from '@/stores/auth-store';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { LogOut, User } from 'lucide-react';
 import LanguageSwitcher from './language-switcher';
 import { useTranslations } from 'next-intl';

@@ -19,9 +19,10 @@ class CopyPrismaEnginePlugin {
             for (const basePath of searchPaths) {
                 if (fs.existsSync(basePath)) {
                     const files = fs.readdirSync(basePath)
-                    const found = files.find(
-                        (f) => f.endsWith('.dll.node') || f.endsWith('.so.node'),
-                    )
+                    // Prefer Windows .dll.node over Linux .so.node
+                    const dll = files.find((f) => f.endsWith('.dll.node'))
+                    const so = files.find((f) => f.endsWith('.so.node'))
+                    const found = dll || so
                     if (found) {
                         engineFile = found
                         srcPath = path.join(basePath, found)
@@ -32,8 +33,22 @@ class CopyPrismaEnginePlugin {
 
             if (engineFile && srcPath) {
                 const dest = path.join(compiler.outputPath, engineFile)
-                fs.copyFileSync(srcPath, dest)
-                console.log(`✓ Copied Prisma engine: ${engineFile}`)
+                try {
+                    // Only copy if destination doesn't exist or is different (avoids EBUSY on Windows hot reload)
+                    if (!fs.existsSync(dest)) {
+                        fs.copyFileSync(srcPath, dest)
+                        console.log(`✓ Copied Prisma engine: ${engineFile}`)
+                    } else {
+                        console.log(`✓ Prisma engine already exists: ${engineFile}`)
+                    }
+                } catch (err) {
+                    // EBUSY on Windows: engine is locked by running process, skip
+                    if (err.code === 'EBUSY') {
+                        console.log(`⚠ Engine file busy, skipping copy (already loaded)`)
+                    } else {
+                        throw err
+                    }
+                }
             } else {
                 console.error('✗ Prisma engine file not found')
             }
@@ -51,7 +66,7 @@ module.exports = function (options) {
             nodeExternals({
                 allowlist: [
                     // Bundle workspace packages
-                    /^@rag-ai\/.*/,
+                    /^@jd-match\/.*/,
                     // Allow Prisma client and engine to be bundled
                     '@prisma/client',
                     'prisma',
@@ -62,14 +77,13 @@ module.exports = function (options) {
             ...options.resolve,
             alias: {
                 // Ensure workspace packages are resolved correctly
-                '@rag-ai/ai': path.resolve(__dirname, '../../packages/ai/src'),
-                '@rag-ai/config': path.resolve(__dirname, '../../packages/config/src'),
-                '@rag-ai/database': path.resolve(__dirname, '../../packages/database/src'),
-                '@rag-ai/document-parser': path.resolve(
+                '@jd-match/ai': path.resolve(__dirname, '../../packages/ai/src'),
+                '@jd-match/config': path.resolve(__dirname, '../../packages/config/src'),
+                '@jd-match/database': path.resolve(__dirname, '../../packages/database/src'),
+                '@jd-match/shared-types': path.resolve(
                     __dirname,
-                    '../../packages/document-parser/src',
+                    '../../packages/shared-types/src',
                 ),
-                '@rag-ai/shared-types': path.resolve(__dirname, '../../packages/shared-types/src'),
             },
         },
         plugins: [...(options.plugins || []), new CopyPrismaEnginePlugin()],

@@ -1,5 +1,5 @@
 {
-    "name": "@rag-ai/shared-types",
+    "name": "@jd-match/shared-types",
     "version": "0.1.0",
     "private": true,
     "main": "./src/index.ts",

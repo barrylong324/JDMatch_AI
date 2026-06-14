@@ -1,6 +1,6 @@
 {
     "common": {
-        "appName": "RAG AI 知识库",
+        "appName": "JDMatch AI",
         "loading": "加载中...",
         "error": "发生错误",
         "success": "成功",
@@ -17,10 +17,8 @@
     },
     "navigation": {
         "dashboard": "仪表板",
-        "knowledgeBases": "知识库",
-        "chat": "RAG对话",
-        "aigcChat": "AIGC对话",
-        "upload": "上传",
+        "matching": "简历匹配",
+        "history": "匹配历史",
         "settings": "设置"
     },
     "settings": {
@@ -80,36 +78,124 @@
         "title": "仪表板",
         "welcome": "欢迎回来",
         "stats": {
-            "totalKBs": "知识库总数",
-            "totalDocuments": "文档总数",
-            "totalChats": "对话总数"
+            "totalMatchings": "匹配总数",
+            "avgScore": "平均匹配度",
+            "thisMonth": "本月匹配",
+            "highestScore": "最高匹配度"
         }
     },
-    "knowledgeBases": {
-        "title": "知识库",
-        "createNew": "新建",
-        "empty": "暂无知识库",
-        "createFirst": "创建您的第一个知识库以开始使用",
-        "name": "名称",
-        "description": "描述",
-        "documents": "文档数",
-        "createdAt": "创建时间"
+    "matching": {
+        "title": "简历匹配",
+        "uploadResume": "上传简历",
+        "pasteJD": "粘贴岗位描述链接",
+        "jdPlaceholder": "粘贴 Boss 直聘 / 拉勾等平台的岗位链接...",
+        "jdUrlLabel": "岗位链接",
+        "startMatching": "开始匹配分析",
+        "matchingInProgress": "AI 正在分析匹配度...",
+        "matchScore": "匹配度",
+        "strengths": "优势分析",
+        "weaknesses": "待提升项",
+        "suggestions": "优化建议",
+        "skillGap": "技能差距",
+        "resumeTips": "简历优化建议",
+        "uploadHint": "支持 PDF、DOCX 格式，最大 10MB",
+        "dragDropHint": "拖拽文件到此处或点击上传",
+        "noResume": "请先上传简历",
+        "noJD": "请输入岗位链接",
+        "resultTitle": "匹配分析报告",
+        "overallMatch": "综合匹配度",
+        "keywordMatch": "关键词匹配",
+        "skillMatch": "技能匹配",
+        "experienceMatch": "经验匹配",
+        "educationMatch": "学历匹配"
     },
-    "chat": {
-        "title": "智能对话",
-        "selectKB": "选择知识库",
-        "sendMessage": "发送消息",
-        "typing": "AI 正在输入...",
-        "empty": "开始对话",
-        "placeholder": "请输入问题..."
+    "history": {
+        "title": "匹配历史",
+        "empty": "暂无匹配记录",
+        "startFirst": "上传简历开始你的第一次匹配分析",
+        "filterAll": "全部",
+        "filterCompleted": "已完成",
+        "filterInProgress": "分析中",
+        "date": "日期",
+        "position": "岗位",
+        "score": "匹配度",
+        "status": "状态",
+        "viewDetails": "查看详情",
+        "delete": "删除",
+        "deleting": "删除中...",
+        "untitled": "未命名匹配",
+        "deleteConfirmTitle": "确认删除",
+        "deleteConfirmMessage": "确定要删除这条匹配记录吗？此操作不可撤销。",
+        "deleteSuccess": "删除成功",
+        "deleteFailed": "删除失败，请稍后再试",
+        "paginationInfo": "共 {count} 条记录，第 {current}/{total} 页"
     },
-    "upload": {
-        "title": "上传文档",
-        "dragDrop": "拖拽文件到此处",
-        "orClick": "或点击浏览",
-        "supportedFormats": "支持的格式：PDF、DOCX、TXT、MD",
-        "uploading": "上传中...",
-        "uploaded": "上传成功",
-        "failed": "上传失败"
+    "feedback": {
+        "title": "匹配详情",
+        "overallScore": "综合匹配度",
+        "questionReview": "逐项分析",
+        "yourAnswer": "简历内容",
+        "aiComment": "AI 分析与建议",
+        "scoreLabel": "得分",
+        "backToHistory": "返回历史"
+    },
+    "landing": {
+        "nav": {
+            "appName": "JDMatch AI",
+            "login": "登录",
+            "startNow": "立即开始"
+        },
+        "hero": {
+            "title": "简历与岗位，精准匹配一步到位",
+            "subtitle": "上传你的简历，粘贴目标岗位链接，AI 即刻分析匹配度并给出专业优化建议，让你的简历脱颖而出。",
+            "ctaStart": "免费开始匹配",
+            "ctaLearnMore": "了解更多"
+        },
+        "features": {
+            "title": "核心功能",
+            "subtitle": "AI 驱动的简历-岗位匹配分析，助你精准定位求职方向",
+            "multiDomain": {
+                "title": "智能匹配分析",
+                "description": "基于 AI 深度语义理解，对比简历与岗位描述的多维度匹配度，精准量化你的竞争力。"
+            },
+            "aiFollowUp": {
+                "title": "多维度评估",
+                "description": "从技能、经验、学历、关键词四大维度全面解析，清晰呈现优势与差距。"
+            },
+            "instantFeedback": {
+                "title": "即时优化建议",
+                "description": "匹配分析完成后立即获得针对性简历优化建议，教你如何调整简历以提升匹配度。"
+            },
+            "history": {
+                "title": "匹配历史追踪",
+                "description": "所有匹配记录永久保存，随时回顾对比不同岗位的匹配情况，追踪简历迭代效果。"
+            }
+        },
+        "howItWorks": {
+            "title": "使用流程",
+            "subtitle": "三步完成简历-岗位匹配分析",
+            "step1": {
+                "title": "上传简历",
+                "description": "上传你的个人简历文件（支持 PDF / DOCX），AI 将自动解析简历内容与技能标签。"
+            },
+            "step2": {
+                "title": "粘贴岗位链接",
+                "description": "从 Boss 直聘、拉勾等招聘平台复制目标岗位链接，系统自动抓取 JD 进行深度分析。"
+            },
+            "step3": {
+                "title": "获取匹配报告",
+                "description": "AI 即时生成详细匹配度报告，涵盖多维评分、技能差距分析与简历优化建议。"
+            }
+        },
+        "cta": {
+            "title": "准备好让你的简历脱颖而出了吗？",
+            "subtitle": "立即注册，免费体验 AI 简历匹配分析",
+            "button": "免费开始使用"
+        },
+        "footer": {
+            "copyright": "© 2026 JDMatch AI. All rights reserved.",
+            "login": "登录",
+            "register": "注册"
+        }
     }
 }
