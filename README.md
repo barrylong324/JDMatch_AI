@@ -214,7 +214,7 @@ pnpm format
 **推荐方案**：
 
 - 前端: Vercel
-- 后端: Railway / Render
+- 后端: Railway
 - 数据库: Neon (PostgreSQL)
 
 ---
@@ -235,6 +235,30 @@ nest g controller modules/matching
 
 ---
 
-## 📄 许可证
+## � 后端难点亮点
+
+### 1. Monorepo 重命名与 Turbo 构建一致性
+
+**问题**：项目从 `@rag-ai` 重命名为 `@jd-match` 后，Dockerfile 中 Turborepo 的 `--filter=@rag-ai/backend` 找不到匹配的包（包名已变更为 `@jd-match/backend`），Turbo 静默跳过构建，`dist/main.js` 从未生成。Railway 容器启动时直接报 `Cannot find module` 崩溃，所有健康检查失败。
+
+**解决**：同步更新所有 Dockerfile、`next.config.mjs`、`docker-compose.yml` 及环境变量中的旧包名引用，确保 Monorepo 内命名完全一致。关键在于理解 Turborepo 的 filter 机制——它依赖 `package.json` 中的 `name` 字段精确匹配，命名不一致不会报错，而是直接跳过，极易被忽视。
+
+### 2. Prisma 查询引擎跨平台兼容
+
+**问题**：`copy-prisma-engine.js` 构建脚本写死了优先复制 Windows 平台的 Prisma 查询引擎（`.dll.node`）到 `dist/` 目录。Railway 使用 Linux 容器，PE 格式的 `.dll` 文件无法被 Linux 内核执行，启动时报 `Exec format error`，进程直接退出，健康检查持续失败。
+
+**解决**：重构引擎选择逻辑，使用 `process.platform` 运行时检测当前操作系统，按优先级匹配引擎扩展名：
+
+| 平台               | 优先引擎       | 降级兜底                     |
+| ------------------ | -------------- | ---------------------------- |
+| `linux` (Railway)  | `.so.node`     | `.dll.node` → `.darwin.node` |
+| `win32` (本地开发) | `.dll.node`    | `.so.node` → `.darwin.node`  |
+| `darwin` (macOS)   | `.darwin.node` | `.so.node` → `.dll.node`     |
+
+这样本机构建与 CI/CD 容器构建各取所需，互不干扰，从根本上杜绝跨平台引擎错配问题。
+
+---
+
+## �📄 许可证
 
 MIT License
