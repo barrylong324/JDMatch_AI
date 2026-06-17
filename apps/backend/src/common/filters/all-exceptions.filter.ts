@@ -43,7 +43,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
                     message = '数据关系冲突，请检查关联数据'
                     break
                 default:
-                    message = '数据库操作异常，请稍后再试'
+                    // 临时暴露 Prisma 错误码和消息，方便排查生产问题
+                    message = `数据库操作异常 [${exception.code}]: ${exception.message.substring(0, 200)}`
             }
             console.error(
                 `[Prisma] ${exception.code} ${request.method} ${request.url}:`,
