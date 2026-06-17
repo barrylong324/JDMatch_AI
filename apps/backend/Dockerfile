@@ -22,7 +22,6 @@ EXPOSE 4000
 
 ENV NODE_ENV=production
 ENV PORT=4000
-ENV DATABASE_URL=postgresql://postgres:postgres@postgres:5432/jd_match_db
-ENV REDIS_URL=redis://redis:6379
 
-CMD ["node", "apps/backend/dist/main.js"]
+# 容器启动时先运行数据库迁移，再启动应用
+CMD ["sh", "-c", "cd /app/packages/database && pnpm exec prisma migrate deploy && node /app/apps/backend/dist/main.js"]
