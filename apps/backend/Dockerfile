@@ -23,5 +23,6 @@ EXPOSE 4000
 ENV NODE_ENV=production
 ENV PORT=4000
 
-# 容器启动时先运行数据库迁移，再启动应用
+# 容器启动时先跑数据库迁移（用直连 URL 绕过连接池），再启动应用
+# Prisma 的 directUrl 字段会自动读取 DIRECT_DATABASE_URL 环境变量进行迁移
 CMD ["sh", "-c", "cd /app/packages/database && pnpm exec prisma migrate deploy && node /app/apps/backend/dist/main.js"]
