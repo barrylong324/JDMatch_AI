@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Bot, Send, Sparkles, Trash2, Plus, MessageSquare, Loader2, Pencil, Copy, RefreshCw, Check, X, Image as ImageIcon, Paperclip } from 'lucide-react';
-import { streamAiChat, getAiChatConversations, deleteAiChatConversation, getAiChatMessages } from '@/lib/requestModule/request-bus';
-import type { AiChatSSEChunk } from '@/lib/requestModule/request-bus';
+import { streamAiChat, getAiChatConversations, deleteAiChatConversation, getAiChatMessages, getAiChatUsage } from '@/lib/requestModule/request-bus';
+import type { AiChatSSEChunk, ModelUsageInfo } from '@/lib/requestModule/request-bus';
 import { toast } from 'sonner';
 
 interface Message {
@@ -37,6 +37,8 @@ export default function AiAssistantPage() {
     const [showAttachMenu, setShowAttachMenu] = useState(false);
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [model, setModel] = useState<'flash' | 'pro'>('flash');
+    const [usage, setUsage] = useState<ModelUsageInfo | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -84,7 +86,13 @@ export default function AiAssistantPage() {
     // 加载对话列表
     useEffect(() => {
         loadConversations();
+        loadUsage();
     }, []);
+
+    // 模型切换时刷新用量
+    useEffect(() => {
+        loadUsage();
+    }, [model]);
 
     const loadConversations = async () => {
         try {
@@ -95,6 +103,17 @@ export default function AiAssistantPage() {
             // 静默失败
         } finally {
             setLoadingHistory(false);
+        }
+    };
+
+    const loadUsage = async () => {
+        try {
+            const res = await getAiChatUsage();
+            if (res?.data?.result) {
+                setUsage(res.data.result);
+            }
+        } catch {
+            // 静默失败
         }
     };
 
@@ -174,7 +193,7 @@ export default function AiAssistantPage() {
 
         try {
             let fullContent = '';
-            for await (const chunk of streamAiChat(trimmed, conversationId)) {
+            for await (const chunk of streamAiChat(trimmed, conversationId, model)) {
                 if (chunk.type === 'content' && chunk.content) {
                     fullContent += chunk.content;
                     setMessages((prev) =>
@@ -189,6 +208,8 @@ export default function AiAssistantPage() {
                         setConversationId(chunk.conversationId);
                         loadConversations();
                     }
+                    // 刷新用量
+                    loadUsage();
                 }
 
                 if (chunk.type === 'error') {
@@ -214,6 +235,7 @@ export default function AiAssistantPage() {
             );
         } finally {
             setIsStreaming(false);
+            loadUsage();
         }
     };
 
@@ -278,7 +300,7 @@ export default function AiAssistantPage() {
 
         try {
             let fullContent = '';
-            for await (const chunk of streamAiChat(trimmed, conversationId)) {
+            for await (const chunk of streamAiChat(trimmed, conversationId, model)) {
                 if (chunk.type === 'content' && chunk.content) {
                     fullContent += chunk.content;
                     setMessages((prev) =>
@@ -303,6 +325,7 @@ export default function AiAssistantPage() {
             toast.error(error.message || t('streamError'));
         } finally {
             setIsStreaming(false);
+            loadUsage();
         }
     };
 
@@ -337,7 +360,7 @@ export default function AiAssistantPage() {
 
         try {
             let fullContent = '';
-            for await (const chunk of streamAiChat(userMsg.content, conversationId)) {
+            for await (const chunk of streamAiChat(userMsg.content, conversationId, model)) {
                 if (chunk.type === 'content' && chunk.content) {
                     fullContent += chunk.content;
                     setMessages((prev) =>
@@ -362,6 +385,7 @@ export default function AiAssistantPage() {
             toast.error(error.message || t('streamError'));
         } finally {
             setIsStreaming(false);
+            loadUsage();
         }
     };
 
@@ -468,12 +492,38 @@ export default function AiAssistantPage() {
                             <p className="text-xs text-gray-500">{t('description')}</p>
                         </div>
                     </div>
-                    <button
-                        onClick={() => setShowSidebar(!showSidebar)}
-                        className="text-sm text-gray-400 hover:text-gray-600"
-                    >
-                        {showSidebar ? '隐藏历史' : '显示历史'}
-                    </button>
+                    <div className="flex items-center gap-3">
+                        {/* 模型选择器 */}
+                        <select
+                            value={model}
+                            onChange={(e) => setModel(e.target.value as 'flash' | 'pro')}
+                            className="text-xs border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 cursor-pointer hover:border-gray-400"
+                        >
+                            <option value="flash">⚡ Flash（免费 100 次）</option>
+                            <option value="pro">🧠 Pro（免费 20 次）</option>
+                        </select>
+                        {/* 用量条 */}
+                        {usage && (
+                            <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                                <div className="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full rounded-full transition-all ${usage[model].used >= usage[model].limit ? 'bg-red-500' : 'bg-black'
+                                            }`}
+                                        style={{ width: `${Math.min((usage[model].used / usage[model].limit) * 100, 100)}%` }}
+                                    />
+                                </div>
+                                <span className="whitespace-nowrap tabular-nums">
+                                    {usage[model].used}/{usage[model].limit}
+                                </span>
+                            </div>
+                        )}
+                        <button
+                            onClick={() => setShowSidebar(!showSidebar)}
+                            className="text-sm text-gray-400 hover:text-gray-600"
+                        >
+                            {showSidebar ? '隐藏历史' : '显示历史'}
+                        </button>
+                    </div>
                 </div>
 
                 {/* 消息区域 */}

@@ -1,8 +1,20 @@
-import { Controller, Post, Get, Body, HttpCode, HttpStatus, Res, Req, UseGuards } from '@nestjs/common'
+import {
+    Controller,
+    Post,
+    Get,
+    Body,
+    HttpCode,
+    HttpStatus,
+    Res,
+    Req,
+    UseGuards,
+    BadRequestException,
+} from '@nestjs/common'
 import { ApiTags, ApiOperation } from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
 import type { Response, Request } from 'express'
 import { AuthService } from './auth.service'
+import { CaptchaService } from './captcha.service'
 import { LoginDto } from './dto/login.dto'
 import { RegisterDto } from './dto/register.dto'
 import type { GitHubUserProfile } from './strategies/github.strategy'
@@ -11,12 +23,30 @@ import { config } from '@jd-match/config'
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) {}
+    constructor(
+        private readonly authService: AuthService,
+        private readonly captchaService: CaptchaService,
+    ) {}
+
+    /**
+     * 获取登录验证码（SVG 图片 + captchaId）
+     */
+    @Get('captcha')
+    @ApiOperation({ summary: 'Get login captcha SVG' })
+    getCaptcha() {
+        return this.captchaService.generate()
+    }
 
     @Post('login')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Login with email and password' })
     async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response) {
+        // 先校验验证码
+        const captchaValid = this.captchaService.validate(loginDto.captchaId, loginDto.captcha)
+        if (!captchaValid) {
+            throw new BadRequestException('验证码错误或已过期')
+        }
+
         const user = await this.authService.validateUser(loginDto.email, loginDto.password)
         const result = await this.authService.login(user)
 
@@ -30,6 +60,14 @@ export class AuthController {
     @Post('register')
     @ApiOperation({ summary: 'Register a new user' })
     async register(@Body() registerDto: RegisterDto) {
+        // 先校验验证码
+        const captchaValid = this.captchaService.validate(
+            registerDto.captchaId,
+            registerDto.captcha,
+        )
+        if (!captchaValid) {
+            throw new BadRequestException('验证码错误或已过期')
+        }
         return this.authService.register(registerDto)
     }
 

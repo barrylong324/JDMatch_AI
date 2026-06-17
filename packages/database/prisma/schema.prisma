@@ -24,6 +24,7 @@ model User {
 
   accounts      Account[]
   sessions      Session[]
+  modelUsages   ModelUsage[]
 
   matchingConversations AigcConversation[]
   aiChatConversations   AiChatConversation[]
@@ -100,6 +101,10 @@ model AigcConversation {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   messages   AigcMessage[]
+
+  // Resume file info (S3)
+  resumeKey    String?
+  resumeName   String?
 
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -209,4 +214,18 @@ model AuditLog {
   @@index([userId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ============================================
+// Model Usage Tracking（模型用量追踪）
+// ============================================
+model ModelUsage {
+  id     String @id @default(dbgenerated("generate_big_id()"))
+  userId String
+  model  String // "flash" | "pro"
+  count  Int    @default(0)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, model])
+  @@map("model_usage")
 }

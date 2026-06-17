@@ -2,17 +2,19 @@
 import service from '@/lib/requestModule/request-base'
 
 // 1.auth模块
-interface LoginOrRegister {
-    email: string
-    password: string
-    name?: string
-}
 // 登录
-export const contextRagLogin = (email: string, password: string) => {
-    const param: LoginOrRegister = {
+export const contextRagLogin = (
+    email: string,
+    password: string,
+    captchaId: string,
+    captcha: string,
+) => {
+    const param = {
         email,
         password,
-    } as LoginOrRegister
+        captchaId,
+        captcha,
+    }
     return service({
         url: '/auth/login',
         method: 'post',
@@ -20,12 +22,20 @@ export const contextRagLogin = (email: string, password: string) => {
     })
 }
 // 注册
-export const contextRagRegister = (email: string, password: string, name?: string) => {
-    const param: LoginOrRegister = {
+export const contextRagRegister = (
+    email: string,
+    password: string,
+    name: string,
+    captchaId: string,
+    captcha: string,
+) => {
+    const param = {
         email,
         password,
         name,
-    } as LoginOrRegister
+        captchaId,
+        captcha,
+    }
     return service({
         url: '/auth/register',
         method: 'post',
@@ -119,18 +129,18 @@ export async function* streamMatching(
 
 /** SSE 数据块类型（与后端 SSEChunk 对应） */
 export interface SSEDataChunk {
-    type: 'meta' | 'token' | 'error' | 'done'
+    type: 'meta' | 'token' | 'status' | 'error' | 'done'
     content?: string
     matchingId?: string
     messageId?: string
+    resumeUrl?: string
 }
 
-// 获取所有匹配记录（分页）
-export const getMatchingAllMessage = (page = 1, limit = 10) => {
+// 获取所有匹配记录
+export const getMatchingAllMessage = () => {
     return service({
         url: '/matching/conversations',
         method: 'get',
-        params: { page, limit },
     })
 }
 
@@ -166,11 +176,11 @@ export interface AiChatSSEChunk {
 /**
  * 普通对话（非流式）
  */
-export const sendAiChatMessage = (message: string, conversationId?: string) => {
+export const sendAiChatMessage = (message: string, conversationId?: string, model?: string) => {
     return service({
         url: '/ai-chat/chat',
         method: 'post',
-        data: { message, conversationId },
+        data: { message, conversationId, model },
     })
 }
 
@@ -181,6 +191,7 @@ export const sendAiChatMessage = (message: string, conversationId?: string) => {
 export async function* streamAiChat(
     message: string,
     conversationId?: string,
+    model?: string,
 ): AsyncGenerator<AiChatSSEChunk, void, unknown> {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
@@ -191,7 +202,7 @@ export async function* streamAiChat(
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ message, conversationId }),
+        body: JSON.stringify({ message, conversationId, model }),
     })
 
     if (!response.ok) {
@@ -257,5 +268,20 @@ export const deleteAiChatConversation = (conversationId: string) => {
     return service({
         url: `/ai-chat/conversations/${conversationId}`,
         method: 'delete',
+    })
+}
+
+/**
+ * 获取 AI 模型用量
+ */
+export interface ModelUsageInfo {
+    flash: { used: number; limit: number }
+    pro: { used: number; limit: number }
+}
+
+export const getAiChatUsage = () => {
+    return service({
+        url: '/ai-chat/usage',
+        method: 'get',
     })
 }

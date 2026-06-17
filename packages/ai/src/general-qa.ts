@@ -45,20 +45,38 @@ const rejectUnrelatedTopic = tool(
 )
 
 // ============================================
-// 初始化 ChatDeepSeek 实例
+// 初始化 ChatDeepSeek 实例（按模型类型）
 // ============================================
-const baseClient = new ChatDeepSeek({
-    apiKey: config.OPENAI_API_KEY,
-    model: 'deepseek-v4-flash',
-    configuration: {
-        baseURL: 'https://api.deepseek.com/v1',
-    },
-    temperature: 0.7,
-    maxRetries: 2,
-} as any)
 
-// 绑定工具：让 LLM 可以在不相关时调用 reject 工具
-const clientWithTools = (baseClient as any).bindTools([rejectUnrelatedTopic])
+type AiModel = 'flash' | 'pro'
+
+const MODEL_CONFIG: Record<AiModel, { name: string; maxTokens: number }> = {
+    flash: { name: 'deepseek-v4-flash', maxTokens: 100 },
+    pro: { name: 'deepseek-v4-pro', maxTokens: 200 },
+}
+
+function createClient(model: AiModel) {
+    return new ChatDeepSeek({
+        apiKey: config.OPENAI_API_KEY,
+        model: MODEL_CONFIG[model].name,
+        configuration: {
+            baseURL: 'https://api.deepseek.com/v1',
+        },
+        temperature: 0.7,
+        maxRetries: 2,
+    } as any)
+}
+
+// 缓存实例避免重复创建
+const clientCache = new Map<AiModel, any>()
+
+function getClient(model: AiModel = 'flash') {
+    if (!clientCache.has(model)) {
+        clientCache.set(model, createClient(model))
+    }
+    const client = clientCache.get(model)!
+    return (client as any).bindTools([rejectUnrelatedTopic])
+}
 
 // ============================================
 // 辅助函数：从 LLM 响应中提取拒绝消息
@@ -81,12 +99,12 @@ function extractRejectionMessage(response: any): string | null {
 // ============================================
 // 封装异步函数处理对话请求（带工具调用守卫）
 // ============================================
-export async function askDeepSeek(prompt: string) {
+export async function askDeepSeek(prompt: string, model: AiModel = 'flash') {
     try {
+        const client = getClient(model)
         const messages: BaseMessage[] = [new SystemMessage(SYSTEM_PROMPT), new HumanMessage(prompt)]
-        const response = await clientWithTools.invoke(messages as any)
+        const response = await client.invoke(messages as any)
 
-        // 检查 LLM 是否调用了拒绝工具
         const rejection = extractRejectionMessage(response)
         if (rejection) {
             return rejection
@@ -102,10 +120,14 @@ export async function askDeepSeek(prompt: string) {
 // ============================================
 // 流式调用（带工具调用守卫）
 // ============================================
-export async function* askDeepSeekStream(prompt: string): AsyncGenerator<string, void, unknown> {
+export async function* askDeepSeekStream(
+    prompt: string,
+    model: AiModel = 'flash',
+): AsyncGenerator<string, void, unknown> {
     try {
+        const client = getClient(model)
         const messages: BaseMessage[] = [new SystemMessage(SYSTEM_PROMPT), new HumanMessage(prompt)]
-        const stream = await clientWithTools.stream(messages as any)
+        const stream = await client.stream(messages as any)
 
         // 用于累积流式传输中的 tool_call 片段
         const accumulatedToolCalls: Map<number, { name: string; args: string }> = new Map()

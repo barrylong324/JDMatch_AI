@@ -1,6 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
 import { PrismaService } from '../../database/prisma.service'
 import { askDeepSeek, askDeepSeekStream } from '@jd-match/ai'
+
+type AiModel = 'flash' | 'pro'
+
+/** 每个模型的免费使用上限 */
+const MODEL_LIMITS: Record<AiModel, number> = {
+    flash: 100,
+    pro: 20,
+}
 
 export interface SSEChunk {
     type: 'content' | 'done' | 'error'
@@ -15,9 +23,70 @@ export class AiChatService {
     constructor(private prisma: PrismaService) {}
 
     /**
+     * 检查用户模型用量是否超限
+     */
+    async checkUsage(userId: string, model: AiModel): Promise<void> {
+        const usage = await this.prisma.modelUsage.findUnique({
+            where: { userId_model: { userId, model } },
+        })
+        const count = usage?.count ?? 0
+        const limit = MODEL_LIMITS[model]
+
+        if (count >= limit) {
+            const modelName = model === 'pro' ? 'DeepSeek V4 Pro' : 'DeepSeek V4 Flash'
+            throw new BadRequestException(
+                `${modelName} 免费额度已用完（${limit} 次）。请充值或切换其他模型继续使用。`,
+            )
+        }
+    }
+
+    /**
+     * 增加用量计数
+     */
+    private async incrementUsage(userId: string, model: AiModel): Promise<void> {
+        await this.prisma.modelUsage.upsert({
+            where: { userId_model: { userId, model } },
+            create: { userId, model, count: 1 },
+            update: { count: { increment: 1 } },
+        })
+    }
+
+    /**
+     * 获取用户当前用量
+     */
+    async getUsage(userId: string) {
+        const [flashUsage, proUsage] = await Promise.all([
+            this.prisma.modelUsage.findUnique({
+                where: { userId_model: { userId, model: 'flash' } },
+            }),
+            this.prisma.modelUsage.findUnique({
+                where: { userId_model: { userId, model: 'pro' } },
+            }),
+        ])
+
+        return {
+            code: 0,
+            message: 'ok',
+            result: {
+                flash: {
+                    used: flashUsage?.count ?? 0,
+                    limit: MODEL_LIMITS.flash,
+                },
+                pro: {
+                    used: proUsage?.count ?? 0,
+                    limit: MODEL_LIMITS.pro,
+                },
+            },
+        }
+    }
+
+    /**
      * Normal chat (non-streaming)
      */
-    async chat(userId: string, message: string, conversationId?: string) {
+    async chat(userId: string, message: string, conversationId?: string, model: AiModel = 'flash') {
+        // 用量检查
+        await this.checkUsage(userId, model)
+
         let conversation = conversationId
             ? await this.prisma.aiChatConversation.findFirst({
                   where: { id: conversationId, userId },
@@ -52,7 +121,10 @@ export class AiChatService {
         const contextPrompt = this.buildContextPrompt(historyMessages, message)
 
         // Call AI
-        const answer = await askDeepSeek(contextPrompt)
+        const answer = await askDeepSeek(contextPrompt, model)
+
+        // 用量 +1
+        await this.incrementUsage(userId, model)
 
         // Save AI response
         const aiMessage = await this.prisma.aiChatMessage.create({
@@ -89,8 +161,12 @@ export class AiChatService {
         userId: string,
         message: string,
         conversationId?: string,
+        model: AiModel = 'flash',
     ): AsyncGenerator<SSEChunk, void, unknown> {
         try {
+            // 用量检查
+            await this.checkUsage(userId, model)
+
             let conversation = conversationId
                 ? await this.prisma.aiChatConversation.findFirst({
                       where: { id: conversationId, userId },
@@ -126,10 +202,13 @@ export class AiChatService {
 
             // Stream AI response
             let fullAnswer = ''
-            for await (const chunk of askDeepSeekStream(contextPrompt)) {
+            for await (const chunk of askDeepSeekStream(contextPrompt, model)) {
                 fullAnswer += chunk
                 yield { type: 'content', content: chunk, conversationId: conversation.id }
             }
+
+            // 用量 +1
+            await this.incrementUsage(userId, model)
 
             // Save AI response
             const aiMessage = await this.prisma.aiChatMessage.create({

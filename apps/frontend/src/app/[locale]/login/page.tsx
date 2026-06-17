@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { Link, useRouter } from '@/navigation';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth-store';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ function GitHubCallbackHandler() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const login = useAuthStore((state) => state.login);
+    const t = useTranslations('auth');
 
     useEffect(() => {
         const token = searchParams.get('token');
@@ -36,7 +38,7 @@ function GitHubCallbackHandler() {
         const error = searchParams.get('error');
 
         if (error) {
-            toast.error('GitHub 登录失败，请重试');
+            toast.error(t('githubLoginFailed'));
             // 清理 URL 参数
             window.history.replaceState({}, '', window.location.pathname);
             return;
@@ -52,10 +54,10 @@ function GitHubCallbackHandler() {
                 },
                 token,
             );
-            toast.success('GitHub 登录成功！');
+            toast.success(t('githubLoginSuccess'));
             router.push('/dashboard');
         }
-    }, [searchParams, router, login]);
+    }, [searchParams, router, login, t]);
 
     return null;
 }
@@ -63,18 +65,51 @@ function GitHubCallbackHandler() {
 function LoginForm() {
     const router = useRouter();
     const login = useAuthStore((state) => state.login);
+    const t = useTranslations('auth');
     const [formData, setFormData] = useState({
         email: '',
         password: '',
+        captcha: '',
     });
+    const [captchaId, setCaptchaId] = useState('');
+    const [captchaSvg, setCaptchaSvg] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [captchaLoading, setCaptchaLoading] = useState(false);
+
+    /** 获取验证码 */
+    const fetchCaptcha = async () => {
+        setCaptchaLoading(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/auth/captcha`);
+            const data = await res.json();
+            // 拦截器包装了 { code, message, result }，数据在 result 里
+            const captchaData = data.result ?? data;
+            setCaptchaId(captchaData.captchaId);
+            setCaptchaSvg(captchaData.svg);
+            setFormData((prev) => ({ ...prev, captcha: '' }));
+        } catch {
+            // 静默失败
+        } finally {
+            setCaptchaLoading(false);
+        }
+    };
+
+    // 组件挂载时获取验证码
+    useEffect(() => {
+        fetchCaptcha();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
         try {
-            const response = await contextRagLogin(formData.email, formData.password);
+            const response = await contextRagLogin(
+                formData.email,
+                formData.password,
+                captchaId,
+                formData.captcha,
+            );
             const { code, message, result } = response.data;
             if (code === 0) {
                 const { user, access_token } = result;
@@ -84,7 +119,12 @@ function LoginForm() {
                 router.push('/dashboard');
             }
         } catch (error: any) {
-            toast.error(error.response?.data?.message || '登录失败！');
+            const errMsg = error.response?.data?.message || t('loginFailed');
+            toast.error(errMsg);
+            // 验证码错误时刷新验证码
+            if (errMsg.includes('验证码') || errMsg.includes('captcha') || errMsg.includes('Captcha')) {
+                fetchCaptcha();
+            }
         } finally {
             setIsLoading(false);
         }
@@ -98,10 +138,10 @@ function LoginForm() {
         <Card className="w-full border-gray-200 shadow-lg">
             <CardHeader className="space-y-1">
                 <CardTitle className="text-2xl font-bold text-center">
-                    登录 JDMatch AI
+                    {t('loginTitle')}
                 </CardTitle>
                 <CardDescription className="text-center">
-                    登录后开始您的简历匹配分析之旅
+                    {t('loginDescription')}
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -113,7 +153,7 @@ function LoginForm() {
                     onClick={handleGitHubLogin}
                 >
                     <GitHubIcon className="w-5 h-5" />
-                    使用 GitHub 登录
+                    {t('githubLogin')}
                 </Button>
 
                 {/* 分隔线 */}
@@ -122,18 +162,18 @@ function LoginForm() {
                         <span className="w-full border-t border-gray-200" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-2 text-gray-400">或</span>
+                        <span className="bg-white px-2 text-gray-400">{t('orDivider')}</span>
                     </div>
                 </div>
 
                 {/* 邮箱登录表单 */}
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="email">Email address</Label>
+                        <Label htmlFor="email">{t('email')}</Label>
                         <Input
                             id="email"
                             type="email"
-                            placeholder="Enter your email"
+                            placeholder={t('emailPlaceholder')}
                             required
                             value={formData.email}
                             onChange={(e) =>
@@ -142,11 +182,11 @@ function LoginForm() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor="password">{t('password')}</Label>
                         <Input
                             id="password"
                             type="password"
-                            placeholder="Enter your password"
+                            placeholder={t('passwordPlaceholder')}
                             required
                             value={formData.password}
                             onChange={(e) =>
@@ -154,23 +194,62 @@ function LoginForm() {
                             }
                         />
                     </div>
+
+                    {/* 验证码 */}
+                    <div className="space-y-2">
+                        <Label htmlFor="captcha">{t('captcha')}</Label>
+                        <div className="flex gap-2">
+                            <Input
+                                id="captcha"
+                                type="text"
+                                placeholder={t('captchaPlaceholder')}
+                                required
+                                maxLength={4}
+                                className="flex-1"
+                                value={formData.captcha}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, captcha: e.target.value.toUpperCase() })
+                                }
+                            />
+                            {/* 验证码图片 */}
+                            <button
+                                type="button"
+                                className="h-10 w-[120px] flex-shrink-0 border border-gray-200 rounded-md overflow-hidden hover:border-gray-400 transition-colors disabled:opacity-50"
+                                onClick={fetchCaptcha}
+                                disabled={captchaLoading}
+                                title={t('captchaRefresh')}
+                            >
+                                {captchaSvg ? (
+                                    <div
+                                        className="w-full h-full"
+                                        dangerouslySetInnerHTML={{ __html: captchaSvg }}
+                                    />
+                                ) : (
+                                    <span className="text-xs text-gray-400">
+                                        {captchaLoading ? t('captchaLoading') : t('captchaGet')}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+
                     <Button
                         type="submit"
                         className="w-full bg-black text-white hover:bg-gray-800"
                         disabled={isLoading}
                     >
-                        {isLoading ? 'Signing in...' : 'Sign in'}
+                        {isLoading ? t('signingIn') : t('signIn')}
                     </Button>
                 </form>
             </CardContent>
             <CardFooter className="flex flex-col">
                 <p className="text-sm text-center text-gray-600">
-                    没有账户？
+                    {t('noAccount')}
                     <Link
                         href="/register"
                         className="font-medium text-black hover:text-gray-700 underline ml-1"
                     >
-                        Sign up
+                        {t('signUp')}
                     </Link>
                 </p>
             </CardFooter>
@@ -179,6 +258,8 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+    const t = useTranslations('auth');
+
     return (
         <div className="min-h-screen flex">
             {/* ========== 左侧：动画表情区域 ========== */}
@@ -201,7 +282,7 @@ export default function LoginPage() {
                         href="/"
                         className="inline-flex items-center text-sm text-gray-400 hover:text-black transition-colors"
                     >
-                        ← 返回首页
+                        {t('backToHome')}
                     </Link>
                 </div>
 
@@ -229,7 +310,7 @@ export default function LoginPage() {
                             href="/"
                             className="text-sm text-gray-400 hover:text-black transition-colors"
                         >
-                            ← 返回首页
+                            {t('backToHome')}
                         </Link>
                     </div>
                 </div>
