@@ -257,6 +257,28 @@ nest g controller modules/matching
 
 这样本机构建与 CI/CD 容器构建各取所需，互不干扰，从根本上杜绝跨平台引擎错配问题。
 
+### 3. 线上数据库迁移缺失导致全面报错
+
+**问题**：本地开发一切正常，部署到 Railway + Neon 后大量接口报错。排查发现两个根本原因：
+
+- **`generate_big_id()` 函数缺失**：Prisma schema 中所有表的主键默认值依赖 `@default(dbgenerated("generate_big_id()"))`，但初始迁移 SQL 只创建了表结构，从未定义此函数。本地数据库因早期手动执行过所以正常，Neon 空库上完全不存在。
+- **`pgvector` 扩展未启用**：向量嵌入字段使用 `vector(1536)` 类型，依赖 PostgreSQL 扩展，Neon 默认未开启。
+- **Dockerfile 无迁移步骤**：原 Dockerfile 的 `CMD` 直接 `node main.js` 启动应用，`prisma migrate deploy` 从未在容器启动时执行。即使后续补了迁移文件，线上数据库也不会自动应用。
+
+**解决**：
+
+1. 新增迁移 `20260617000000_add_big_id_function`，使用幂等 SQL 补齐缺失的数据库函数、序列和扩展：
+    - `CREATE EXTENSION IF NOT EXISTS vector` — pgvector 向量扩展
+    - `CREATE SEQUENCE IF NOT EXISTS global_id_seq` — 全局 ID 序列
+    - `CREATE OR REPLACE FUNCTION generate_big_id()` — Snowflake 风格分布式 ID 生成器（41 位时间戳 + 5 位分片 + 10 位序列号）
+
+2. 更新 `Dockerfile` CMD，确保每次容器启动先执行迁移再启动应用：
+    ```dockerfile
+    CMD ["sh", "-c", "cd /app/packages/database && pnpm exec prisma migrate deploy && node /app/apps/backend/dist/main.js"]
+    ```
+
+**启示**：`dbgenerated()` 引用的自定义数据库函数需要手动迁移，Prisma 不会自动创建。线上部署必须确保 CI/CD 流程中包含 `prisma migrate deploy` 步骤，否则本地验证通过不等于线上可用。
+
 ---
 
 ## �📄 许可证
