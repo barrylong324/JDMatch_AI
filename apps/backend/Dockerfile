@@ -2,6 +2,10 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Cache bust: change this value to force a clean rebuild
+ARG CACHE_BUST=1
+RUN echo "Build cache bust: ${CACHE_BUST}"
+
 # Install pnpm and OpenSSL
 RUN corepack enable && corepack prepare pnpm@latest --activate && \
     apk add --no-cache openssl
