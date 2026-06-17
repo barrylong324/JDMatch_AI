@@ -3,9 +3,10 @@ builder = "DOCKERFILE"
 dockerfilePath = "apps/backend/Dockerfile"
 
 [build.buildArgs]
-CACHE_BUST = "20260618-1"
+CACHE_BUST = "20260618-2"
 
 [deploy]
+startCommand = "/app/apps/backend/start.sh"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 restartPolicyType = "on_failure"
