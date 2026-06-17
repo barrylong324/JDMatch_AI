@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { ThrottlerModule } from '@nestjs/throttler'
 import { DatabaseModule } from './database/database.module'
+import { StorageModule } from './common/storage/storage.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { UsersModule } from './modules/users/users.module'
 import { MatchingModule } from './modules/matching/matching.module'
@@ -26,6 +27,9 @@ import { config, getRateLimitTtl, getRateLimitMax } from '@jd-match/config'
 
         // Database
         DatabaseModule,
+
+        // Storage (S3 + File Upload + JD Fetcher)
+        StorageModule,
 
         // Feature modules
         AuthModule,

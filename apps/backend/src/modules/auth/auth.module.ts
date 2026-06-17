@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { AuthService } from './auth.service'
 import { AuthController } from './auth.controller'
+import { CaptchaService } from './captcha.service'
 import { UsersModule } from '../users/users.module'
 import { JwtStrategy } from './strategies/jwt.strategy'
 import { GitHubOAuthStrategy } from './strategies/github.strategy'
@@ -17,7 +18,7 @@ import { config } from '@jd-match/config'
             signOptions: { expiresIn: config.JWT_ACCESS_TOKEN_EXPIRES_IN },
         }),
     ],
-    providers: [AuthService, JwtStrategy, GitHubOAuthStrategy],
+    providers: [AuthService, CaptchaService, JwtStrategy, GitHubOAuthStrategy],
     controllers: [AuthController],
     exports: [AuthService],
 })

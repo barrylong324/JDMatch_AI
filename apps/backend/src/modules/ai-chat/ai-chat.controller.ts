@@ -30,9 +30,15 @@ export class AiChatController {
     async chat(
         @Body('message') message: string,
         @Body('conversationId') conversationId: string | undefined,
+        @Body('model') model: string | undefined,
         @Req() req: any,
     ) {
-        return this.aiChatService.chat(req.user.userId, message, conversationId)
+        return this.aiChatService.chat(
+            req.user.userId,
+            message,
+            conversationId,
+            model === 'pro' ? 'pro' : 'flash',
+        )
     }
 
     /**
@@ -43,6 +49,7 @@ export class AiChatController {
     async chatStream(
         @Body('message') message: string,
         @Body('conversationId') conversationId: string | undefined,
+        @Body('model') model: string | undefined,
         @Req() req: any,
         @Res() res: Response,
     ) {
@@ -58,6 +65,7 @@ export class AiChatController {
                 req.user.userId,
                 message,
                 conversationId,
+                model === 'pro' ? 'pro' : 'flash',
             )) {
                 res.write(`data: ${JSON.stringify(chunk)}\n\n`)
             }
@@ -66,6 +74,15 @@ export class AiChatController {
         } finally {
             res.end()
         }
+    }
+
+    /**
+     * 获取模型用量
+     */
+    @Get('usage')
+    @ApiOperation({ summary: '获取用户模型用量' })
+    async getUsage(@Req() req: any) {
+        return this.aiChatService.getUsage(req.user.userId)
     }
 
     /**
@@ -90,10 +107,7 @@ export class AiChatController {
      */
     @Get('conversations/:conversationId')
     @ApiOperation({ summary: '获取指定对话的消息列表' })
-    async getMessages(
-        @Req() req: any,
-        @Param('conversationId', ) conversationId: string,
-    ) {
+    async getMessages(@Req() req: any, @Param('conversationId') conversationId: string) {
         return this.aiChatService.getMessages(req.user.userId, conversationId)
     }
 
@@ -102,10 +116,7 @@ export class AiChatController {
      */
     @Delete('conversations/:conversationId')
     @ApiOperation({ summary: '删除AI对话' })
-    async deleteConversation(
-        @Req() req: any,
-        @Param('conversationId', ) conversationId: string,
-    ) {
+    async deleteConversation(@Req() req: any, @Param('conversationId') conversationId: string) {
         return this.aiChatService.deleteConversation(req.user.userId, conversationId)
     }
 }

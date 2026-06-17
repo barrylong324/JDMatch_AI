@@ -10,8 +10,8 @@ export default function Sidebar() {
 
     const navigation = [
         { name: t('dashboard'), href: '/dashboard', icon: Home },
-        { name: t('matching'), href: '/dashboard/matching', icon: Target },
         { name: t('aiAssistant'), href: '/dashboard/ai-assistant', icon: Bot },
+        { name: t('matching'), href: '/dashboard/matching', icon: Target },
         { name: t('history'), href: '/dashboard/history', icon: History },
         { name: t('settings'), href: '/dashboard/settings', icon: Settings },
     ];
