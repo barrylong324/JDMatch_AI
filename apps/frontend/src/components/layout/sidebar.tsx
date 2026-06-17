@@ -1,7 +1,7 @@
 'use client';
 
 import { Link, usePathname } from '@/navigation';
-import { Home, Target, History, Settings } from 'lucide-react';
+import { Home, Target, Bot, History, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export default function Sidebar() {
@@ -11,6 +11,7 @@ export default function Sidebar() {
     const navigation = [
         { name: t('dashboard'), href: '/dashboard', icon: Home },
         { name: t('matching'), href: '/dashboard/matching', icon: Target },
+        { name: t('aiAssistant'), href: '/dashboard/ai-assistant', icon: Bot },
         { name: t('history'), href: '/dashboard/history', icon: History },
         { name: t('settings'), href: '/dashboard/settings', icon: Settings },
     ];

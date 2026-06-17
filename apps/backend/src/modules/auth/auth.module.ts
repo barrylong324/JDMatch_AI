@@ -5,6 +5,7 @@ import { AuthService } from './auth.service'
 import { AuthController } from './auth.controller'
 import { UsersModule } from '../users/users.module'
 import { JwtStrategy } from './strategies/jwt.strategy'
+import { GitHubOAuthStrategy } from './strategies/github.strategy'
 import { config } from '@jd-match/config'
 
 @Module({
@@ -16,7 +17,7 @@ import { config } from '@jd-match/config'
             signOptions: { expiresIn: config.JWT_ACCESS_TOKEN_EXPIRES_IN },
         }),
     ],
-    providers: [AuthService, JwtStrategy],
+    providers: [AuthService, JwtStrategy, GitHubOAuthStrategy],
     controllers: [AuthController],
     exports: [AuthService],
 })

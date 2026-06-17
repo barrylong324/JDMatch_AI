@@ -1,16 +1,16 @@
-import * as dotenv from 'dotenv';
-import { resolve } from 'path';
-import { z } from 'zod';
+import * as dotenv from 'dotenv'
+import { resolve } from 'path'
+import { z } from 'zod'
 
 // Load environment variables from root .env file if not already loaded
 if (!process.env.OPENAI_API_KEY) {
-    const envPath = resolve(process.cwd(), '.env');
-    const result = dotenv.config({ path: envPath });
+    const envPath = resolve(process.cwd(), '.env')
+    const result = dotenv.config({ path: envPath })
 
     if (result.parsed) {
-        console.log(`✅ Loaded environment variables from: ${envPath}`);
+        console.log(`✅ Loaded environment variables from: ${envPath}`)
     } else {
-        console.warn('⚠️ Could not load .env file from:', envPath);
+        console.warn('⚠️ Could not load .env file from:', envPath)
     }
 }
 
@@ -40,6 +40,11 @@ const envSchema = z.object({
     JWT_ACCESS_TOKEN_EXPIRES_IN: z.string().default('15m'),
     JWT_REFRESH_TOKEN_EXPIRES_IN: z.string().default('7d'),
 
+    // GitHub OAuth
+    GITHUB_CLIENT_ID: z.string().optional(),
+    GITHUB_CLIENT_SECRET: z.string().optional(),
+    GITHUB_CALLBACK_URL: z.string().url().optional(),
+
     // File Storage (AWS S3 / Cloudflare R2)
     AWS_S3_BUCKET: z.string().optional(),
     AWS_S3_REGION: z.string().default('us-east-1'),
@@ -53,37 +58,37 @@ const envSchema = z.object({
     // Rate Limiting
     RATE_LIMIT_TTL: z.string().default('60'),
     RATE_LIMIT_MAX: z.string().default('100'),
-});
+})
 
-export type EnvConfig = z.infer<typeof envSchema>;
+export type EnvConfig = z.infer<typeof envSchema>
 
 // ============================================
 // Validate and export environment variables
 // ============================================
 
-let config: EnvConfig;
+let config: EnvConfig
 
 try {
-    config = envSchema.parse(process.env);
+    config = envSchema.parse(process.env)
 } catch (error) {
     if (error instanceof z.ZodError) {
-        console.error('❌ Invalid environment variables:');
-        console.error(error.errors.map((e) => `  - ${e.path.join('.')}: ${e.message}`).join('\n'));
-        throw new Error('Invalid environment variables. Check .env file.');
+        console.error('❌ Invalid environment variables:')
+        console.error(error.errors.map((e) => `  - ${e.path.join('.')}: ${e.message}`).join('\n'))
+        throw new Error('Invalid environment variables. Check .env file.')
     }
-    throw error;
+    throw error
 }
 
-export { config };
+export { config }
 
 // ============================================
 // Helper functions
 // ============================================
 
-export const isDevelopment = config.NODE_ENV === 'development';
-export const isProduction = config.NODE_ENV === 'production';
-export const isTest = config.NODE_ENV === 'test';
+export const isDevelopment = config.NODE_ENV === 'development'
+export const isProduction = config.NODE_ENV === 'production'
+export const isTest = config.NODE_ENV === 'test'
 
-export const getPort = () => parseInt(config.PORT, 10);
-export const getRateLimitTtl = () => parseInt(config.RATE_LIMIT_TTL, 10);
-export const getRateLimitMax = () => parseInt(config.RATE_LIMIT_MAX, 10);
+export const getPort = () => parseInt(config.PORT, 10)
+export const getRateLimitTtl = () => parseInt(config.RATE_LIMIT_TTL, 10)
+export const getRateLimitMax = () => parseInt(config.RATE_LIMIT_MAX, 10)

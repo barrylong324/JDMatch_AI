@@ -1,17 +1,66 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Link, useRouter } from '@/navigation';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { contextRagLogin } from '@/lib/requestModule/request-bus'
+import { contextRagLogin } from '@/lib/requestModule/request-bus';
+import MascotAvatar from '@/components/login/mascot-avatar';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-export default function LoginPage() {
+/** GitHub 图标 SVG */
+function GitHubIcon({ className }: { className?: string }) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+        </svg>
+    );
+}
+
+/** 处理 GitHub OAuth 回调参数的组件 */
+function GitHubCallbackHandler() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const login = useAuthStore((state) => state.login);
+
+    useEffect(() => {
+        const token = searchParams.get('token');
+        const name = searchParams.get('name');
+        const email = searchParams.get('email');
+        const error = searchParams.get('error');
+
+        if (error) {
+            toast.error('GitHub 登录失败，请重试');
+            // 清理 URL 参数
+            window.history.replaceState({}, '', window.location.pathname);
+            return;
+        }
+
+        if (token && email) {
+            login(
+                {
+                    id: '',
+                    email,
+                    name: name || email,
+                    role: 'USER',
+                },
+                token,
+            );
+            toast.success('GitHub 登录成功！');
+            router.push('/dashboard');
+        }
+    }, [searchParams, router, login]);
+
+    return null;
+}
+
+function LoginForm() {
     const router = useRouter();
     const login = useAuthStore((state) => state.login);
     const [formData, setFormData] = useState({
@@ -25,10 +74,10 @@ export default function LoginPage() {
         setIsLoading(true);
 
         try {
-            const response = await contextRagLogin(formData.email, formData.password)
-            const { code, message, result } = response.data
+            const response = await contextRagLogin(formData.email, formData.password);
+            const { code, message, result } = response.data;
             if (code === 0) {
-                const { user, access_token } = result
+                const { user, access_token } = result;
 
                 login(user, access_token);
                 toast.success(message);
@@ -41,73 +90,155 @@ export default function LoginPage() {
         }
     };
 
+    const handleGitHubLogin = () => {
+        window.location.href = `${API_BASE_URL}/auth/github`;
+    };
+
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4">
-            <div className="w-full max-w-md mb-6">
-                <Link
-                    href="/"
-                    className="inline-flex items-center text-sm text-gray-500 hover:text-black transition-colors"
+        <Card className="w-full border-gray-200 shadow-lg">
+            <CardHeader className="space-y-1">
+                <CardTitle className="text-2xl font-bold text-center">
+                    登录 JDMatch AI
+                </CardTitle>
+                <CardDescription className="text-center">
+                    登录后开始您的简历匹配分析之旅
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {/* GitHub 登录按钮 */}
+                <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full flex items-center justify-center gap-2 border-gray-300 hover:bg-gray-50"
+                    onClick={handleGitHubLogin}
                 >
-                    ← 返回首页
-                </Link>
-            </div>
-            <Card className="w-full max-w-md border-gray-200 shadow-lg">
-                <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center">登录 JDMatch AI</CardTitle>
-                    <CardDescription className="text-center">
-                        登录后开始您的简历匹配分析之旅
-                    </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleSubmit}>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email address</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="Enter your email"
-                                required
-                                value={formData.email}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, email: e.target.value })
-                                }
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                placeholder="Enter your password"
-                                required
-                                value={formData.password}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, password: e.target.value })
-                                }
-                            />
-                        </div>
-                    </CardContent>
-                    <CardFooter className="flex flex-col space-y-4">
-                        <Button
-                            type="submit"
-                            className="w-full bg-black text-white hover:bg-gray-800"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Signing in...' : 'Sign in'}
-                        </Button>
-                        <p className="text-sm text-center text-gray-600">
-                            {/* Don't have an account?{' '} */}
-                            没有账户？
-                            <Link
-                                href="/register"
-                                className="font-medium text-black hover:text-gray-700 underline"
-                            >
-                                Sign up
-                            </Link>
-                        </p>
-                    </CardFooter>
+                    <GitHubIcon className="w-5 h-5" />
+                    使用 GitHub 登录
+                </Button>
+
+                {/* 分隔线 */}
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-gray-200" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-white px-2 text-gray-400">或</span>
+                    </div>
+                </div>
+
+                {/* 邮箱登录表单 */}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="email">Email address</Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            placeholder="Enter your email"
+                            required
+                            value={formData.email}
+                            onChange={(e) =>
+                                setFormData({ ...formData, email: e.target.value })
+                            }
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Input
+                            id="password"
+                            type="password"
+                            placeholder="Enter your password"
+                            required
+                            value={formData.password}
+                            onChange={(e) =>
+                                setFormData({ ...formData, password: e.target.value })
+                            }
+                        />
+                    </div>
+                    <Button
+                        type="submit"
+                        className="w-full bg-black text-white hover:bg-gray-800"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Signing in...' : 'Sign in'}
+                    </Button>
                 </form>
-            </Card>
+            </CardContent>
+            <CardFooter className="flex flex-col">
+                <p className="text-sm text-center text-gray-600">
+                    没有账户？
+                    <Link
+                        href="/register"
+                        className="font-medium text-black hover:text-gray-700 underline ml-1"
+                    >
+                        Sign up
+                    </Link>
+                </p>
+            </CardFooter>
+        </Card>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <div className="min-h-screen flex">
+            {/* ========== 左侧：动画表情区域 ========== */}
+            <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-gray-50 via-white to-gray-100 flex-col items-center justify-center overflow-hidden">
+                {/* 背景装饰网格 */}
+                <div
+                    className="absolute inset-0 opacity-[0.03]"
+                    style={{
+                        backgroundImage: `
+                            linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)
+                        `,
+                        backgroundSize: '40px 40px',
+                    }}
+                />
+
+                {/* 顶部返回链接 */}
+                <div className="absolute top-6 left-6 z-10">
+                    <Link
+                        href="/"
+                        className="inline-flex items-center text-sm text-gray-400 hover:text-black transition-colors"
+                    >
+                        ← 返回首页
+                    </Link>
+                </div>
+
+                {/* 表情角色 */}
+                <div className="relative z-10">
+                    <MascotAvatar />
+                </div>
+            </div>
+
+            {/* ========== 右侧：登录表单区域 ========== */}
+            <div className="w-full lg:w-1/2 flex flex-col items-center justify-center bg-white px-6 sm:px-12">
+                <div className="w-full max-w-md">
+                    {/* 移动端显示 Logo */}
+                    <div className="lg:hidden flex justify-center mb-8">
+                        <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
+                            <span className="text-3xl">🤖</span>
+                        </div>
+                    </div>
+
+                    <LoginForm />
+
+                    {/* 移动端底部导航 */}
+                    <div className="lg:hidden mt-6 text-center">
+                        <Link
+                            href="/"
+                            className="text-sm text-gray-400 hover:text-black transition-colors"
+                        >
+                            ← 返回首页
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
+            {/* GitHub OAuth 回调处理 */}
+            <Suspense fallback={null}>
+                <GitHubCallbackHandler />
+            </Suspense>
         </div>
     );
 }

@@ -49,7 +49,7 @@ const rejectUnrelatedTopic = tool(
 // ============================================
 const baseClient = new ChatDeepSeek({
     apiKey: config.OPENAI_API_KEY,
-    model: 'deepseek-v4-pro',
+    model: 'deepseek-v4-flash',
     configuration: {
         baseURL: 'https://api.deepseek.com/v1',
     },

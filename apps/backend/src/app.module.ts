@@ -5,6 +5,7 @@ import { DatabaseModule } from './database/database.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { UsersModule } from './modules/users/users.module'
 import { MatchingModule } from './modules/matching/matching.module'
+import { AiChatModule } from './modules/ai-chat/ai-chat.module'
 import { HealthController } from './health.controller'
 import { config, getRateLimitTtl, getRateLimitMax } from '@jd-match/config'
 
@@ -30,6 +31,7 @@ import { config, getRateLimitTtl, getRateLimitMax } from '@jd-match/config'
         AuthModule,
         UsersModule,
         MatchingModule,
+        AiChatModule,
     ],
     providers: [],
     controllers: [HealthController],

@@ -133,13 +133,19 @@ export class MatchingController {
 
     @Get('conversations/:conversationId')
     @ApiOperation({ summary: '获取匹配详情' })
-    async getConversationDetail(@Param('conversationId') conversationId: string, @Req() req: any) {
+    async getConversationDetail(
+        @Param('conversationId', ) conversationId: string,
+        @Req() req: any,
+    ) {
         return this.matchingService.getConversationDetail(conversationId, req.user.userId)
     }
 
     @Delete('conversations/:conversationId')
     @ApiOperation({ summary: '删除匹配记录' })
-    async deleteConversation(@Param('conversationId') conversationId: string, @Req() req: any) {
+    async deleteConversation(
+        @Param('conversationId', ) conversationId: string,
+        @Req() req: any,
+    ) {
         return this.matchingService.deleteConversation(conversationId, req.user.userId)
     }
 }
