@@ -18,6 +18,7 @@
     "navigation": {
         "dashboard": "仪表板",
         "matching": "简历匹配",
+        "aiAssistant": "AI 助手",
         "history": "匹配历史",
         "settings": "设置"
     },
@@ -197,5 +198,28 @@
             "login": "登录",
             "register": "注册"
         }
+    },
+    "aiAssistant": {
+        "title": "AI 简历助手",
+        "description": "智能简历优化与岗位分析助手",
+        "welcome": "你好！我是 JDMatch AI 助手，专注于简历优化和岗位匹配分析。你可以问我：",
+        "suggestions": {
+            "resume": "如何优化我的简历？",
+            "match": "分析我的岗位匹配度",
+            "skill": "我需要提升哪些技能？",
+            "interview": "面试准备建议"
+        },
+        "inputPlaceholder": "输入你的问题，例如：如何突出我的项目经验...",
+        "send": "发送",
+        "sending": "发送中...",
+        "newChat": "新建对话",
+        "history": "对话历史",
+        "noConversations": "暂无对话记录",
+        "startChat": "开始你的第一次 AI 对话",
+        "deleteConfirm": "确定要删除这条对话吗？",
+        "untitled": "未命名对话",
+        "thinking": "AI 正在思考...",
+        "error": "AI 服务暂时不可用，请稍后再试",
+        "streamError": "连接中断，请重试"
     }
 }

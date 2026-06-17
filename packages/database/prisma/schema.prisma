@@ -13,7 +13,7 @@ datasource db {
 // ============================================
 
 model User {
-  id            String    @id @default(uuid())
+  id            String    @id @default(dbgenerated("generate_big_id()"))
   email         String    @unique
   emailVerified DateTime?
   password      String?   // Hashed with bcrypt
@@ -24,10 +24,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  // Matching Conversations (简历-岗位匹配分析)
   matchingConversations AigcConversation[]
-
-  // API Keys
+  aiChatConversations   AiChatConversation[]
   apiKeys       ApiKey[]
 
   createdAt     DateTime  @default(now())
@@ -45,7 +43,7 @@ enum Role {
 }
 
 model Account {
-  id                String  @id @default(uuid())
+  id                String  @id @default(dbgenerated("generate_big_id()"))
   userId            String
   type              String
   provider          String
@@ -75,7 +73,7 @@ model Session {
 }
 
 // ============================================
-// Matching Conversations (简历-岗位匹配分析)
+// Matching Conversations
 // ============================================
 
 enum MessageRole {
@@ -95,7 +93,7 @@ enum InterviewStatus {
 }
 
 model AigcConversation {
-  id          String   @id @default(uuid())
+  id          String   @id @default(dbgenerated("generate_big_id()"))
   title       String?
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -107,11 +105,11 @@ model AigcConversation {
   deletedAt  DateTime?
 
   @@index([userId])
-  @@map("matching_conversations")
+  @@map("conversations")
 }
 
 model AigcMessage {
-  id             String   @id @default(uuid())
+  id             String          @id @default(dbgenerated("generate_big_id()"))
   conversationId String
   conversation   AigcConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
@@ -125,29 +123,67 @@ model AigcMessage {
   createdAt      DateTime @default(now())
 
   @@index([conversationId])
-  @@map("matching_messages")
+  @@map("messages")
 }
 
 // ============================================
-// API Keys (for external integrations)
+// AI Chat Conversations
+// ============================================
+
+model AiChatConversation {
+  id          String   @id @default(dbgenerated("generate_big_id()"))
+  title       String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  messages    AiChatMessage[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@index([userId])
+  @@map("ai_chat_conversations")
+}
+
+model AiChatMessage {
+  id             String             @id @default(dbgenerated("generate_big_id()"))
+  conversationId String
+  conversation   AiChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role           MessageRole
+  content        String        @db.Text
+
+  sources        Json?
+  rating         MessageRating?
+  feedback       String?
+
+  createdAt      DateTime      @default(now())
+
+  @@index([conversationId])
+  @@map("ai_chat_messages")
+}
+
+// ============================================
+// API Keys
 // ============================================
 
 model ApiKey {
-  id          String   @id @default(uuid())
+  id          String   @id @default(dbgenerated("generate_big_id()"))
   name        String
   key         String   @unique
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  permissions Json?    // Allowed operations
+
+  permissions Json?
   lastUsedAt  DateTime?
-  
+
   isActive    Boolean  @default(true)
   expiresAt   DateTime?
-  
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   @@index([userId])
   @@index([key])
   @@map("api_keys")
@@ -158,17 +194,17 @@ model ApiKey {
 // ============================================
 
 model AuditLog {
-  id        String   @id @default(uuid())
-  userId    String?
-  action    String   // LOGIN, UPLOAD_DOCUMENT, DELETE_KB, etc.
-  resource  String?  // Resource type
-  resourceId String? // Resource ID
-  ipAddress String?
-  userAgent String?
-  metadata  Json?    // Additional context
-  
-  createdAt DateTime @default(now())
-  
+  id         String   @id @default(dbgenerated("generate_big_id()"))
+  userId     String?
+  action     String
+  resource   String?
+  resourceId String?
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json?
+
+  createdAt  DateTime @default(now())
+
   @@index([userId])
   @@index([createdAt])
   @@map("audit_logs")

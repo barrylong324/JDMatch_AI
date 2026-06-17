@@ -240,3 +240,18 @@
         @apply rounded-lg my-2 max-w-full;
     }
 }
+
+/* ============================================
+   自定义关键帧动画
+   ============================================ */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-12px);
+    }
+}

@@ -24,12 +24,66 @@ export class UsersService {
         })
     }
 
+    async findByProvider(provider: string, providerAccountId: string): Promise<User | null> {
+        const account = await this.prisma.account.findUnique({
+            where: {
+                provider_providerAccountId: {
+                    provider,
+                    providerAccountId,
+                },
+            },
+            include: { user: true },
+        })
+
+        return account?.user ?? null
+    }
+
     async create(data: { email: string; password: string; name?: string }): Promise<User> {
         return this.prisma.user.create({
             data: {
                 email: data.email.toLowerCase(),
                 password: data.password,
                 name: data.name,
+            },
+        })
+    }
+
+    async createWithProvider(data: {
+        email: string
+        name: string
+        image?: string | null
+        provider: string
+        providerAccountId: string
+    }): Promise<User> {
+        return this.prisma.user.create({
+            data: {
+                email: data.email.toLowerCase(),
+                name: data.name,
+                image: data.image,
+                accounts: {
+                    create: {
+                        type: 'oauth',
+                        provider: data.provider,
+                        providerAccountId: data.providerAccountId,
+                    },
+                },
+            },
+        })
+    }
+
+    async linkAccount(
+        userId: string,
+        accountData: {
+            provider: string
+            providerAccountId: string
+        },
+    ): Promise<void> {
+        await this.prisma.account.create({
+            data: {
+                userId,
+                type: 'oauth',
+                provider: accountData.provider,
+                providerAccountId: accountData.providerAccountId,
             },
         })
     }

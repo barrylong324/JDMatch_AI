@@ -149,3 +149,113 @@ export const delMatchingMessage = (matchingId: string) => {
         method: 'delete',
     })
 }
+
+// ============================================
+// 4. AI Chat 模块 —— 简历优化/分析 AI 助手
+// ============================================
+
+/** AI 对话 SSE 数据块类型 */
+export interface AiChatSSEChunk {
+    type: 'content' | 'done' | 'error'
+    content?: string
+    conversationId?: string
+    messageId?: string
+    error?: string
+}
+
+/**
+ * 普通对话（非流式）
+ */
+export const sendAiChatMessage = (message: string, conversationId?: string) => {
+    return service({
+        url: '/ai-chat/chat',
+        method: 'post',
+        data: { message, conversationId },
+    })
+}
+
+/**
+ * SSE 流式对话 —— 返回异步生成器
+ * 用法: for await (const chunk of streamAiChat("你好")) { ... }
+ */
+export async function* streamAiChat(
+    message: string,
+    conversationId?: string,
+): AsyncGenerator<AiChatSSEChunk, void, unknown> {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+
+    const response = await fetch(`${API_BASE_URL}/ai-chat/chat/stream`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ message, conversationId }),
+    })
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || `HTTP ${response.status}`)
+    }
+
+    const reader = response.body?.getReader()
+    if (!reader) throw new Error('流式响应不支持')
+
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+            const trimmed = line.trim()
+            if (!trimmed || !trimmed.startsWith('data: ')) continue
+
+            const dataStr = trimmed.slice(6)
+            try {
+                const chunk: AiChatSSEChunk = JSON.parse(dataStr)
+                yield chunk
+                if (chunk.type === 'error') return
+            } catch {
+                // 忽略解析失败的行
+            }
+        }
+    }
+}
+
+/**
+ * 获取 AI 对话列表
+ */
+export const getAiChatConversations = (page = 1, limit = 20) => {
+    return service({
+        url: '/ai-chat/conversations',
+        method: 'get',
+        params: { page, limit },
+    })
+}
+
+/**
+ * 获取 AI 对话消息
+ */
+export const getAiChatMessages = (conversationId: string) => {
+    return service({
+        url: `/ai-chat/conversations/${conversationId}`,
+        method: 'get',
+    })
+}
+
+/**
+ * 删除 AI 对话
+ */
+export const deleteAiChatConversation = (conversationId: string) => {
+    return service({
+        url: `/ai-chat/conversations/${conversationId}`,
+        method: 'delete',
+    })
+}

@@ -34,7 +34,7 @@ export class LoggingInterceptor implements NestInterceptor {
                 // 所有 2xx 成功响应的 code 统一为 0，前端用 code === 0 判断成功
                 return {
                     code: 0,
-                    message: SUCCESS_MESSAGES[method] || '操作成功',
+                    message: '操作成功',
                     result: data,
                 }
             }),

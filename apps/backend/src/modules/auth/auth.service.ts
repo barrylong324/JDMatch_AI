@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcryptjs'
 import { UsersService } from '../users/users.service'
 import { config } from '@jd-match/config'
+import type { GitHubUserProfile } from './strategies/github.strategy'
 
 @Injectable()
 export class AuthService {
@@ -44,6 +45,39 @@ export class AuthService {
                 role: user.role,
             },
         }
+    }
+
+    /**
+     * GitHub OAuth 登录：查找或创建用户，返回 JWT
+     */
+    async loginWithGitHub(profile: GitHubUserProfile) {
+        // 尝试通过 provider + providerId 查找已有账户关联
+        let user = await this.usersService.findByProvider(profile.provider, profile.providerId)
+
+        if (!user && profile.email) {
+            // 没找到 provider 关联，尝试通过 email 查找
+            user = await this.usersService.findByEmail(profile.email)
+            if (user) {
+                // 用户已存在，关联 GitHub 账户
+                await this.usersService.linkAccount(user.id, {
+                    provider: profile.provider,
+                    providerAccountId: profile.providerId,
+                })
+            }
+        }
+
+        if (!user) {
+            // 创建新用户
+            user = await this.usersService.createWithProvider({
+                email: profile.email ?? `${profile.providerId}@github.user`,
+                name: profile.name,
+                image: profile.avatar,
+                provider: profile.provider,
+                providerAccountId: profile.providerId,
+            })
+        }
+
+        return this.login(user)
     }
 
     async register(userData: { email: string; password: string; name?: string }) {
