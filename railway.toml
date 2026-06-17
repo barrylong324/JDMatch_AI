@@ -2,6 +2,9 @@
 builder = "DOCKERFILE"
 dockerfilePath = "apps/backend/Dockerfile"
 
+[build.buildArgs]
+CACHE_BUST = "20260618-1"
+
 [deploy]
 healthcheckPath = "/health"
 healthcheckTimeout = 100
