@@ -168,7 +168,7 @@ export default function ScoreCharts({ analysisText }: ScoreChartsProps) {
                                         border: '1px solid #e5e7eb',
                                         boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
                                     }}
-                                    formatter={(value: number) => [`${value} 分`, '评分']}
+                                    formatter={(value) => [`${value} 分`, '评分']}
                                 />
                                 <Bar dataKey="score" radius={[6, 6, 0, 0]} barSize={40}>
                                     {dimensions.map((_, index) => (
