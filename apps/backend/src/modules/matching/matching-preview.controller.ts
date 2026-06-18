@@ -15,22 +15,31 @@ export class MatchingPreviewController {
     async previewResume(
         @Param('conversationId') _conversationId: string,
         @Query('token') token: string,
-        @Res({ passthrough: true }) res: Response,
+        @Res() res: Response,
     ) {
         if (!token) {
             res.status(HttpStatus.UNAUTHORIZED).json({ code: 1, message: '缺少预览令牌' })
             return
         }
 
-        const { buffer, fileName, mimeType } = await this.matchingService.getResumeForPreview(token)
+        try {
+            const { buffer, fileName, mimeType } =
+                await this.matchingService.getResumeForPreview(token)
 
-        res.set({
-            'Content-Type': mimeType,
-            'Content-Disposition': `inline; filename="${encodeURIComponent(fileName)}"`,
-            'Content-Length': buffer.length.toString(),
-            'Cache-Control': 'private, max-age=3600',
-        })
+            res.set({
+                'Content-Type': mimeType,
+                'Content-Disposition': `inline; filename="${encodeURIComponent(fileName)}"`,
+                'Content-Length': buffer.length.toString(),
+                'Cache-Control': 'private, max-age=3600',
+            })
 
-        return buffer
+            res.send(buffer)
+        } catch (error) {
+            const err = error as any
+            res.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR).json({
+                code: 1,
+                message: err.message || '预览加载失败',
+            })
+        }
     }
 }
