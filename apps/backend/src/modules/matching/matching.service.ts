@@ -1,11 +1,9 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import { PrismaService } from '../../database/prisma.service'
 import { FileUploadService } from '../../common/storage/file-upload.service'
 import { JdFetcherService } from '../../common/storage/jd-fetcher.service'
 import { S3Service } from '../../common/storage/s3.service'
 import { askDeepSeek, askDeepSeekStream } from '@jd-match/ai'
-import { isDevelopment } from '@jd-match/config'
 
 @Injectable()
 export class MatchingService {
@@ -16,7 +14,6 @@ export class MatchingService {
         private readonly fileUploadService: FileUploadService,
         private readonly jdFetcherService: JdFetcherService,
         private readonly s3Service: S3Service,
-        private readonly jwtService: JwtService,
     ) {}
 
     /**
@@ -221,7 +218,7 @@ export class MatchingService {
             throw new NotFoundException('匹配记录未找到')
         }
 
-        // 生成简历预签名下载 URL（1小时有效，用于"下载原件"按钮）
+        // 生成简历预签名下载 URL（1小时有效）
         let resumeUrl: string | null = null
         if (conversation.resumeKey) {
             try {
@@ -229,13 +226,6 @@ export class MatchingService {
             } catch (error) {
                 this.logger.warn(`Failed to generate presigned URL for ${conversation.resumeKey}`)
             }
-        }
-
-        // 生成简历预览 URL（生产环境走后端代理，强制 Content-Disposition: inline）
-        let resumePreviewUrl: string | null = null
-        if (conversation.resumeKey && !isDevelopment) {
-            const token = this.generatePreviewToken(conversation.id, userId)
-            resumePreviewUrl = `/matching/conversations/${conversation.id}/resume/preview?token=${token}`
         }
 
         // 从消息中提取 JD 内容（USER 消息中的 JD 部分）
@@ -251,65 +241,12 @@ export class MatchingService {
                 status: assistantMessage ? 'COMPLETED' : 'IN_PROGRESS',
                 resumeName: conversation.resumeName,
                 resumeUrl,
-                resumePreviewUrl,
                 userMessage: userMessage?.content || null,
                 assistantMessage: assistantMessage?.content || null,
                 messages: conversation.messages,
                 createdAt: conversation.createdAt,
                 updatedAt: conversation.updatedAt,
             },
-        }
-    }
-
-    /**
-     * 生成简历预览临时 token（1 小时有效，嵌入 iframe URL 中免登入）
-     */
-    private generatePreviewToken(conversationId: string, userId: string): string {
-        return this.jwtService.sign(
-            { conversationId, userId, purpose: 'resume_preview' },
-            { expiresIn: '1h' },
-        )
-    }
-
-    /**
-     * 通过临时 token 获取简历文件内容（用于代理预览端点）
-     * 由后端从 OSS 下载后强制返回 Content-Disposition: inline
-     */
-    async getResumeForPreview(token: string): Promise<{
-        buffer: Buffer
-        fileName: string
-        mimeType: string
-    }> {
-        let payload: { conversationId: string; userId: string; purpose: string }
-        try {
-            payload = this.jwtService.verify(token)
-        } catch {
-            throw new NotFoundException('预览链接已过期或无效，请刷新页面')
-        }
-
-        if (payload.purpose !== 'resume_preview') {
-            throw new NotFoundException('无效的预览链接')
-        }
-
-        const conversation = await this.prisma.aigcConversation.findFirst({
-            where: { id: payload.conversationId, userId: payload.userId, deletedAt: null },
-            select: { resumeKey: true, resumeName: true },
-        })
-
-        if (!conversation || !conversation.resumeKey) {
-            throw new NotFoundException('简历文件未找到')
-        }
-
-        const buffer = await this.s3Service.downloadFile(conversation.resumeKey)
-        const isPdf = conversation.resumeKey.endsWith('.pdf')
-        const mimeType = isPdf
-            ? 'application/pdf'
-            : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-
-        return {
-            buffer,
-            fileName: conversation.resumeName || 'resume',
-            mimeType,
         }
     }
 
