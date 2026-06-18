@@ -46,11 +46,13 @@ const envSchema = z.object({
     GITHUB_CLIENT_SECRET: z.string().optional(),
     GITHUB_CALLBACK_URL: z.string().url().optional(),
 
-    // File Storage (AWS S3 / Cloudflare R2)
+    // File Storage (AWS S3 / Cloudflare R2 / Alibaba OSS / MinIO)
     AWS_S3_BUCKET: z.string().optional(),
     AWS_S3_REGION: z.string().default('us-east-1'),
     AWS_ACCESS_KEY_ID: z.string().optional(),
     AWS_SECRET_ACCESS_KEY: z.string().optional(),
+    AWS_S3_ENDPOINT: z.string().url().optional(),
+    AWS_S3_FORCE_PATH_STYLE: z.string().optional(),
 
     // Frontend
     NEXT_PUBLIC_APP_URL: z.string().url(),
