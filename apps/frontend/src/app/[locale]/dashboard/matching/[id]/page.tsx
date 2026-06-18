@@ -164,11 +164,12 @@ export default function MatchingDetailPage() {
                     <CardContent className="border-t border-gray-100 p-0">
                         {detail.resumePreviewUrl ? (
                             detail.resumeName?.endsWith('.pdf') ? (
-                                <iframe
-                                    src={`${process.env.NEXT_PUBLIC_API_URL}${detail.resumePreviewUrl}`}
-                                    className="w-full h-[600px] rounded-b-lg"
-                                    title="Resume Preview"
-                                />
+                                <span>{`${process.env.NEXT_PUBLIC_API_URL}${detail.resumePreviewUrl}`}</span>
+                                // <iframe
+                                //     src={`${process.env.NEXT_PUBLIC_API_URL}${detail.resumePreviewUrl}`}
+                                //     className="w-full h-[600px] rounded-b-lg"
+                                //     title="Resume Preview"
+                                // />
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-12 gap-4">
                                     <FileText className="h-16 w-16 text-gray-300" />
