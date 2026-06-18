@@ -1,5 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common'
 
+// pdfjs-dist v4.x 需要 Promise.withResolvers（Node.js 22+ / ES2024）
+// 低版本 Node 兜底 polyfill
+if (typeof (Promise as any).withResolvers !== 'function') {
+    ;(Promise as any).withResolvers = function () {
+        let resolve: any, reject: any
+        const promise = new Promise((res, rej) => {
+            resolve = res
+            reject = rej
+        })
+        return { promise, resolve, reject }
+    }
+}
+
 /**
  * 文档解析服务 —— 将 PDF/DOCX 文件解析为纯文本
  * PDF: 使用 pdfjs-dist 官方库
