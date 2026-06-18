@@ -36,8 +36,8 @@ export class DocumentParserService {
      */
     private async parsePdf(buffer: Buffer): Promise<string> {
         try {
-            // CommonJS 兼容：使用 require 加载 pdfjs-dist
-            const pdfjsLib = require('pdfjs-dist')
+            // pdfjs-dist v4.x 是 ESM-only，必须用动态 import
+            const pdfjsLib = await import('pdfjs-dist')
 
             // 将 Buffer 转为 Uint8Array（零拷贝，避免复制大文件）
             const uint8Array = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength)
