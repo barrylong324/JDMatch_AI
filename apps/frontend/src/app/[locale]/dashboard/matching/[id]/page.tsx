@@ -24,6 +24,7 @@ interface MatchDetail {
     status: 'COMPLETED' | 'IN_PROGRESS';
     resumeName: string | null;
     resumeUrl: string | null;
+    resumePreviewUrl: string | null;
     userMessage: string | null;
     assistantMessage: string | null;
     createdAt: string;
@@ -161,7 +162,31 @@ export default function MatchingDetailPage() {
                 </CardHeader>
                 {showResume && (
                     <CardContent className="border-t border-gray-100 p-0">
-                        {detail.resumeUrl ? (
+                        {detail.resumePreviewUrl ? (
+                            detail.resumeName?.endsWith('.pdf') ? (
+                                <iframe
+                                    src={`${process.env.NEXT_PUBLIC_API_URL}${detail.resumePreviewUrl}`}
+                                    className="w-full h-[600px] rounded-b-lg"
+                                    title="Resume Preview"
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-12 gap-4">
+                                    <FileText className="h-16 w-16 text-gray-300" />
+                                    <p className="text-gray-500 text-sm">{detail.resumeName}</p>
+                                    {detail.resumeUrl && (
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => window.open(detail.resumeUrl!, '_blank')}
+                                            className="border-gray-300"
+                                        >
+                                            <ExternalLink className="h-4 w-4 mr-2" />
+                                            {t('downloadResume')}
+                                        </Button>
+                                    )}
+                                </div>
+                            )
+                        ) : detail.resumeUrl ? (
+                            // 旧数据没有 previewUrl 时回退到直接用 OSS URL
                             detail.resumeName?.endsWith('.pdf') ? (
                                 <iframe
                                     src={detail.resumeUrl}
