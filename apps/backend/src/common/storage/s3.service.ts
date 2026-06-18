@@ -23,25 +23,53 @@ export class S3Service {
     constructor() {
         this.bucket = config.AWS_S3_BUCKET || 'jd-match-uploads'
 
-        // 开发环境使用 MinIO，生产环境使用 Cloudflare R2 / AWS S3
         const isDev = isDevelopment
+
+        // 确定 endpoint:
+        //   开发环境 → MinIO (localhost:9000)
+        //   生产环境 → 优先用 AWS_S3_ENDPOINT（OSS/COS/自建 MinIO 等）
+        //             其次 region=auto → Cloudflare R2
+        //             否则 → 标准 AWS S3 (endpoint=undefined)
+        let endpoint: string | undefined
+        let forcePathStyle: boolean
+
+        if (isDev) {
+            endpoint = 'http://localhost:9000'
+            forcePathStyle = true
+        } else if (config.AWS_S3_ENDPOINT) {
+            // 阿里云 OSS / 腾讯云 COS / 自建 MinIO 等任意 S3 兼容服务
+            endpoint = config.AWS_S3_ENDPOINT
+            forcePathStyle = config.AWS_S3_FORCE_PATH_STYLE === 'true'
+        } else if (config.AWS_S3_REGION === 'auto') {
+            // Cloudflare R2（兼容旧配置）
+            endpoint = `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`
+            forcePathStyle = false
+        } else {
+            // 标准 AWS S3
+            endpoint = undefined
+            forcePathStyle = false
+        }
 
         this.s3Client = new S3Client({
             region: config.AWS_S3_REGION || 'us-east-1',
-            endpoint: isDev
-                ? 'http://localhost:9000' // MinIO 本地地址
-                : config.AWS_S3_REGION === 'auto'
-                  ? `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`
-                  : undefined,
+            endpoint,
             credentials: {
                 accessKeyId: isDev ? 'minioadmin' : config.AWS_ACCESS_KEY_ID || '',
                 secretAccessKey: isDev ? 'minioadmin' : config.AWS_SECRET_ACCESS_KEY || '',
             },
-            forcePathStyle: isDev, // MinIO 需要 path-style 访问
+            forcePathStyle,
         })
 
+        const provider = isDev
+            ? 'MinIO/dev'
+            : config.AWS_S3_ENDPOINT
+              ? 'Custom S3'
+              : config.AWS_S3_REGION === 'auto'
+                ? 'Cloudflare R2'
+                : 'AWS S3'
+
         this.logger.log(
-            `S3 Service initialized [${isDev ? 'MinIO/dev' : 'Production'}] bucket=${this.bucket}`,
+            `S3 Service initialized [${provider}] bucket=${this.bucket} endpoint=${endpoint ?? 'default'}`,
         )
     }
 
