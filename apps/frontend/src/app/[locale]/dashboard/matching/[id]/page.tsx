@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
@@ -40,12 +40,50 @@ export default function MatchingDetailPage() {
     const [loading, setLoading] = useState(true);
     const [showResume, setShowResume] = useState(false);
     const [showJD, setShowJD] = useState(false);
+    const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
+    const [pdfLoading, setPdfLoading] = useState(false);
+    const pdfBlobRef = useRef<string | null>(null);
 
     useEffect(() => {
         if (!id) return;
         loadDetail();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
+
+    // 展开简历卡片时，通过 fetch 下载 PDF 并转为 blob URL（绕过跨域 iframe 限制）
+    useEffect(() => {
+        if (!showResume || !detail?.resumePreviewUrl) return;
+
+        const loadPdf = async () => {
+            setPdfLoading(true);
+            try {
+                const url = `${process.env.NEXT_PUBLIC_API_URL}${detail.resumePreviewUrl}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('PDF 加载失败');
+                const blob = await res.blob();
+                // 先释放旧的 blob URL
+                if (pdfBlobRef.current) URL.revokeObjectURL(pdfBlobRef.current);
+                const blobUrl = URL.createObjectURL(blob);
+                pdfBlobRef.current = blobUrl;
+                setPdfBlobUrl(blobUrl);
+            } catch (err) {
+                console.error('Failed to load PDF preview:', err);
+                setPdfBlobUrl(null);
+            } finally {
+                setPdfLoading(false);
+            }
+        };
+
+        loadPdf();
+
+        return () => {
+            if (pdfBlobRef.current) {
+                URL.revokeObjectURL(pdfBlobRef.current);
+                pdfBlobRef.current = null;
+            }
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showResume, detail?.resumePreviewUrl]);
 
     const loadDetail = async () => {
         setLoading(true);
@@ -164,11 +202,21 @@ export default function MatchingDetailPage() {
                     <CardContent className="border-t border-gray-100 p-0">
                         {detail.resumePreviewUrl ? (
                             detail.resumeName?.endsWith('.pdf') ? (
-                                <iframe
-                                    src={`${process.env.NEXT_PUBLIC_API_URL}${detail.resumePreviewUrl}`}
-                                    className="w-full h-[600px] rounded-b-lg"
-                                    title="Resume Preview"
-                                />
+                                pdfLoading ? (
+                                    <div className="flex items-center justify-center h-[600px]">
+                                        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                                    </div>
+                                ) : pdfBlobUrl ? (
+                                    <iframe
+                                        src={pdfBlobUrl}
+                                        className="w-full h-[600px] rounded-b-lg"
+                                        title="Resume Preview"
+                                    />
+                                ) : (
+                                    <div className="text-center py-12 text-gray-500 text-sm">
+                                        预览加载失败，请重试
+                                    </div>
+                                )
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-12 gap-4">
                                     <FileText className="h-16 w-16 text-gray-300" />
