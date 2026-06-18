@@ -95,6 +95,7 @@ export class S3Service {
             Key: key,
             Body: fileBuffer,
             ContentType: mimeType,
+            ContentDisposition: 'inline', // OSS 浏览器内联预览，不自动下载
             Metadata: {
                 originalName: encodeURIComponent(originalName),
                 uploadedAt: new Date().toISOString(),
