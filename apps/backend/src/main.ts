@@ -38,8 +38,13 @@ async function bootstrap() {
             }),
         )
     } else {
-        // In production, use strict security policies
-        app.use(helmet())
+        // In production, use strict security policies (disable frameguard —
+        // API server doesn't serve HTML pages, so no clickjacking risk)
+        app.use(
+            helmet({
+                frameguard: false,
+            }),
+        )
     }
 
     app.enableCors({
