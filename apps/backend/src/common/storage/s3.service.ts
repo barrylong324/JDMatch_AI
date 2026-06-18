@@ -123,7 +123,6 @@ export class S3Service {
         const command = new GetObjectCommand({
             Bucket: this.bucket,
             Key: key,
-            ResponseContentDisposition: 'inline', // 浏览器内联预览PDF，不自动下载
         })
 
         try {

@@ -24,7 +24,6 @@ interface MatchDetail {
     status: 'COMPLETED' | 'IN_PROGRESS';
     resumeName: string | null;
     resumeUrl: string | null;
-    resumePreviewUrl: string | null;
     userMessage: string | null;
     assistantMessage: string | null;
     createdAt: string;
@@ -50,18 +49,24 @@ export default function MatchingDetailPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
-    // 展开简历卡片时，通过 fetch 下载 PDF 并转为 blob URL（绕过跨域 iframe 限制）
+    // 展开简历卡片时，生产环境通过 fetch 下载 PDF 转为 blob URL（绕过跨域 iframe 限制）
     useEffect(() => {
-        if (!showResume || !detail?.resumePreviewUrl) return;
+        if (!showResume || !detail?.resumeUrl) return;
+
+        const isProd = process.env.NODE_ENV === 'production';
+
+        if (!isProd) {
+            // 开发环境 MinIO 直接预览
+            setPdfBlobUrl(null);
+            return;
+        }
 
         const loadPdf = async () => {
             setPdfLoading(true);
             try {
-                const url = `${process.env.NEXT_PUBLIC_API_URL}${detail.resumePreviewUrl}`;
-                const res = await fetch(url);
+                const res = await fetch(detail.resumeUrl!);
                 if (!res.ok) throw new Error('PDF 加载失败');
                 const blob = await res.blob();
-                // 先释放旧的 blob URL
                 if (pdfBlobRef.current) URL.revokeObjectURL(pdfBlobRef.current);
                 const blobUrl = URL.createObjectURL(blob);
                 pdfBlobRef.current = blobUrl;
@@ -83,7 +88,7 @@ export default function MatchingDetailPage() {
             }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showResume, detail?.resumePreviewUrl]);
+    }, [showResume, detail?.resumeUrl]);
 
     const loadDetail = async () => {
         setLoading(true);
@@ -200,47 +205,31 @@ export default function MatchingDetailPage() {
                 </CardHeader>
                 {showResume && (
                     <CardContent className="border-t border-gray-100 p-0">
-                        {detail.resumePreviewUrl ? (
+                        {detail.resumeUrl ? (
                             detail.resumeName?.endsWith('.pdf') ? (
-                                pdfLoading ? (
-                                    <div className="flex items-center justify-center h-[600px]">
-                                        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-                                    </div>
-                                ) : pdfBlobUrl ? (
+                                process.env.NODE_ENV === 'production' ? (
+                                    pdfLoading ? (
+                                        <div className="flex items-center justify-center h-[600px]">
+                                            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                                        </div>
+                                    ) : pdfBlobUrl ? (
+                                        <iframe
+                                            src={pdfBlobUrl}
+                                            className="w-full h-[600px] rounded-b-lg"
+                                            title="Resume Preview"
+                                        />
+                                    ) : (
+                                        <div className="text-center py-12 text-gray-500 text-sm">
+                                            预览加载失败，请重试
+                                        </div>
+                                    )
+                                ) : (
                                     <iframe
-                                        src={pdfBlobUrl}
+                                        src={detail.resumeUrl}
                                         className="w-full h-[600px] rounded-b-lg"
                                         title="Resume Preview"
                                     />
-                                ) : (
-                                    <div className="text-center py-12 text-gray-500 text-sm">
-                                        预览加载失败，请重试
-                                    </div>
                                 )
-                            ) : (
-                                <div className="flex flex-col items-center justify-center py-12 gap-4">
-                                    <FileText className="h-16 w-16 text-gray-300" />
-                                    <p className="text-gray-500 text-sm">{detail.resumeName}</p>
-                                    {detail.resumeUrl && (
-                                        <Button
-                                            variant="outline"
-                                            onClick={() => window.open(detail.resumeUrl!, '_blank')}
-                                            className="border-gray-300"
-                                        >
-                                            <ExternalLink className="h-4 w-4 mr-2" />
-                                            {t('downloadResume')}
-                                        </Button>
-                                    )}
-                                </div>
-                            )
-                        ) : detail.resumeUrl ? (
-                            // 旧数据没有 previewUrl 时回退到直接用 OSS URL
-                            detail.resumeName?.endsWith('.pdf') ? (
-                                <iframe
-                                    src={detail.resumeUrl}
-                                    className="w-full h-[600px] rounded-b-lg"
-                                    title="Resume Preview"
-                                />
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-12 gap-4">
                                     <FileText className="h-16 w-16 text-gray-300" />
