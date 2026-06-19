@@ -95,7 +95,10 @@
         "loginFailed": "Login failed!",
         "registerFailed": "Registration failed!",
         "githubLoginFailed": "GitHub login failed, please try again",
-        "githubLoginSuccess": "GitHub login successful!"
+        "githubLoginSuccess": "GitHub login successful!",
+        "registrationClosedTitle": "Registration Temporarily Closed",
+        "registrationClosedMessage": "Currently only GitHub login is supported. For an account, please contact barrylong324@gmail.com",
+        "contactForAccount": "For an account, please contact barrylong324@gmail.com"
     },
     "dashboard": {
         "title": "Dashboard",
