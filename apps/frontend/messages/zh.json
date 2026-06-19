@@ -95,7 +95,10 @@
         "loginFailed": "登录失败！",
         "registerFailed": "注册失败！",
         "githubLoginFailed": "GitHub 登录失败，请重试",
-        "githubLoginSuccess": "GitHub 登录成功！"
+        "githubLoginSuccess": "GitHub 登录成功！",
+        "registrationClosedTitle": "注册暂未开放",
+        "registrationClosedMessage": "目前仅支持 GitHub 账号登录，如需正式账号请联系 barrylong324@gmail.com",
+        "contactForAccount": "如需账号请联系 barrylong324@gmail.com"
     },
     "dashboard": {
         "title": "仪表板",

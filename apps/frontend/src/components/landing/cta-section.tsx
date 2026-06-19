@@ -1,11 +1,12 @@
 'use client';
 
-import { Link } from '@/navigation';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 
 export default function CtaSection() {
     const t = useTranslations('landing.cta');
+    const tAuth = useTranslations('auth');
 
     return (
         <section className="py-24 px-6 bg-gray-50">
@@ -14,11 +15,20 @@ export default function CtaSection() {
                 <p className="mt-4 text-lg text-gray-600">{t('subtitle')}</p>
                 <div className="mt-8">
                     <Button
-                        asChild
                         size="lg"
                         className="bg-black text-white hover:bg-gray-800 text-base px-10 py-6"
+                        onClick={() => {
+                            toast.info(tAuth('contactForAccount'), {
+                                duration: 8000,
+                                style: {
+                                    background: '#fff',
+                                    color: '#000',
+                                    border: '1px solid #d1d5db',
+                                },
+                            });
+                        }}
                     >
-                        <Link href="/register">{t('button')}</Link>
+                        {t('button')}
                     </Button>
                 </div>
             </div>
