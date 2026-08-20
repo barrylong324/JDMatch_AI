@@ -77,15 +77,6 @@ export class AiChatController {
     }
 
     /**
-     * 获取模型用量
-     */
-    @Get('usage')
-    @ApiOperation({ summary: '获取用户模型用量' })
-    async getUsage(@Req() req: any) {
-        return this.aiChatService.getUsage(req.user.userId)
-    }
-
-    /**
      * 获取对话列表
      */
     @Get('conversations')

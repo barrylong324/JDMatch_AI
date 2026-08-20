@@ -20,7 +20,128 @@
         "matching": "Resume Matching",
         "aiAssistant": "AI Assistant",
         "history": "History",
+        "smartDelivery": "Smart Delivery",
+        "membership": "VIP Membership",
         "settings": "Settings"
+    },
+    "smartDelivery": {
+        "eyebrow": "Smart Delivery",
+        "title": "Let the right jobs hear from you first",
+        "description": "Prepare your delivery in one flow, from job criteria and JD understanding to matching and a personalized greeting.",
+        "defaultGreeting": "Hello, I have 6 years of B2B product experience and have led AI products from 0 to 1. I noticed that you are hiring a Senior Product Manager, and my background aligns closely with the role. I would welcome the opportunity to connect!",
+        "stages": {
+            "criteria": "Job criteria",
+            "screening": "AI screening",
+            "jd": "JD analysis",
+            "match": "Resume match",
+            "greeting": "Greeting",
+            "confirm": "Confirmation"
+        },
+        "criteria": {
+            "title": "Tell JD Match what you are looking for",
+            "description": "Describe the role, city, salary, and work preferences",
+            "placeholder": "For example: Hangzhou, AI or B2B product manager, 20K-35K, 5+ years of experience, hybrid work preferred",
+            "platform": "Delivery platform",
+            "start": "Screen jobs"
+        },
+        "platforms": {
+            "boss": "Boss Zhipin (available)",
+            "bossName": "BOSS Zhipin",
+            "lagou": "Lagou (coming soon)",
+            "zhilian": "Zhaopin (coming soon)",
+            "51job": "51job (coming soon)"
+        },
+        "screening": {
+            "title": "AI is screening suitable jobs",
+            "description": "Understanding your criteria and organizing the job list..."
+        },
+        "locked": {
+            "title": "Upgrade to Supreme to view full results",
+            "description": "AI has prepared jobs based on your criteria. Upgrade to Supreme to view the complete screening results clearly.",
+            "upgrade": "Upgrade to Supreme"
+        },
+        "jobsFound": "We found {count} high-match jobs for you",
+        "editCriteria": "Edit criteria",
+        "jobs": {
+            "seniorProductManager": "Senior Product Manager",
+            "galaxyTech": "Galaxy Tech",
+            "hangzhouSalary": "Hangzhou · 20-40K",
+            "aiProduct": "AI product",
+            "bProduct": "B2B product",
+            "experience5to10": "5-10 years",
+            "productLead": "Product Lead",
+            "cloudSail": "Cloud Sail",
+            "shanghaiSalary": "Shanghai · 25-45K",
+            "strategicPlanning": "Strategic planning",
+            "teamManagement": "Team management",
+            "toB": "B2B",
+            "aiProductManager": "AI Product Manager",
+            "originLab": "Origin Lab",
+            "beijingSalary": "Beijing · 18-30K",
+            "largeModel": "Large models",
+            "userGrowth": "User growth",
+            "experience0to1": "0-1"
+        },
+        "jd": { "viewMatch": "Analyze JD and view match" },
+        "match": {
+            "summary": "JD analyzed · Your resume matches this job by {score}%",
+            "description": "Strengths: AI product planning, cross-functional collaboration, and user growth. Next, we will create a personalized greeting for this role.",
+            "generateGreeting": "Generate personalized greeting"
+        },
+        "greeting": { "label": "Greeting for {company}", "confirm": "Confirm content" },
+        "confirm": {
+            "description": "After confirmation, messages will be sent one by one through Boss Zhipin.",
+            "send": "Confirm and send",
+            "upgrade": "Upgrade to send"
+        },
+        "sent": "Send result recorded: waiting for a response from Boss",
+        "supreme": {
+            "title": "Supreme member exclusive",
+            "description": "Without Supreme, AI job screening results are shown as a blurred preview. Upgrade to view the full results, generate greetings, and send through Boss Zhipin.",
+            "upgrade": "Upgrade to Supreme"
+        },
+        "records": { "title": "Delivery records", "empty": "No delivery records yet" }
+    },
+    "membership": {
+        "title": "Upgrade to VIP",
+        "description": "Unlock more matching capacity and AI resume tools to move your job search forward",
+        "upgrade": "Upgrade VIP",
+        "vipLabel": "VIP Member",
+        "currentPlan": "Current plan: Free",
+        "plansTitle": "Choose a membership plan",
+        "perMonth": "/month",
+        "basic": "Basic",
+        "advanced": "Advanced",
+        "pro": "Professional",
+        "basicDesc": "For a focused short-term search",
+        "advancedDesc": "Covers a complete job search cycle",
+        "proDesc": "Unlimited matching for high-volume searches",
+        "supreme": "Supreme",
+        "supremeDesc": "Unlock smart delivery and Boss greetings",
+        "deliveryFlow": "Full smart delivery workflow",
+        "bossGreeting": "Boss greetings on Boss Zhipin",
+        "deliveryUnlimited": "Smart screening and delivery records",
+        "match30": "30 resume matches",
+        "match100": "100 resume matches",
+        "unlimitedMatch": "Unlimited resume matching",
+        "basicChat": "Free access to basic AI resume assistant chat",
+        "resumeImage": "Unlock AI resume assistant images",
+        "fileUpload": "Unlock resume file uploads",
+        "recommended": "Recommended",
+        "choosePlan": "Choose plan",
+        "selected": "Selected",
+        "paymentTitle": "Choose a payment method",
+        "wechat": "WeChat Pay",
+        "alipay": "Alipay",
+        "bank": "Bank card",
+        "orderTitle": "Order summary",
+        "membershipDuration": "Membership period",
+        "total": "Total",
+        "payNow": "Pay now",
+        "demoNotice": "Payment is being connected. This screen currently demonstrates the frontend purchase flow.",
+        "paymentNotice": "Choose a payment method, then click Pay now to continue to confirmation.",
+        "paymentStarted": "Payment order created (demo)",
+        "securePayment": "Secure checkout · Review your benefits anytime"
     },
     "settings": {
         "title": "Settings",
@@ -97,8 +218,8 @@
         "githubLoginFailed": "GitHub login failed, please try again",
         "githubLoginSuccess": "GitHub login successful!",
         "registrationClosedTitle": "Registration Temporarily Closed",
-        "registrationClosedMessage": "Currently only GitHub login is supported. For an account, please contact barrylong324@gmail.com",
-        "contactForAccount": "For an account, please contact barrylong324@gmail.com"
+        "registrationClosedMessage": "Registration is temporarily closed. Existing users can sign in with email + password + captcha, new users can sign in via GitHub. For a new account, please contact barrylong324@gmail.com",
+        "contactForAccount": "Registration is temporarily closed. For an account, please contact barrylong324@gmail.com"
     },
     "dashboard": {
         "title": "Dashboard",
@@ -108,6 +229,21 @@
             "avgScore": "Average Match Rate",
             "thisMonth": "This Month",
             "highestScore": "Highest Match Rate"
+        },
+        "records": {
+            "demo": "Demo data",
+            "viewAll": "View all",
+            "aiUsage": {
+                "title": "AI Assistant Usage",
+                "source": "From AI chat history",
+                "empty": "No AI chat records yet",
+                "noMessage": "No recent message"
+            },
+            "recharge": {
+                "title": "Membership Payments",
+                "source": "Recharge API is being connected",
+                "empty": "No recharge records yet"
+            }
         }
     },
     "matching": {

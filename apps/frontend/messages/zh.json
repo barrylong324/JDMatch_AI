@@ -20,7 +20,128 @@
         "matching": "简历匹配",
         "aiAssistant": "AI 助手",
         "history": "匹配历史",
+        "smartDelivery": "智能投递",
+        "membership": "VIP 充值",
         "settings": "设置"
+    },
+    "smartDelivery": {
+        "eyebrow": "智能投递",
+        "title": "让合适的职位，先收到你的消息",
+        "description": "从求职条件到 JD 理解、匹配分析和个性化打招呼，一条流程完成投递准备。",
+        "defaultGreeting": "您好，我有 6 年 B 端产品经验，长期负责 AI 产品从 0 到 1 的规划与落地。看到贵司正在招聘高级产品经理，我的经历与岗位方向很契合，期待有机会进一步交流！",
+        "stages": {
+            "criteria": "求职条件",
+            "screening": "AI 筛选职位",
+            "jd": "JD 解析",
+            "match": "简历匹配",
+            "greeting": "生成打招呼语",
+            "confirm": "用户确认"
+        },
+        "criteria": {
+            "title": "告诉 JD Match 你想找什么",
+            "description": "描述职位方向、城市、薪资和工作偏好",
+            "placeholder": "例如：杭州，AI 或 B 端产品经理，20K-35K，5 年以上经验，接受混合办公",
+            "platform": "投递平台",
+            "start": "开始筛选职位"
+        },
+        "platforms": {
+            "boss": "Boss 直聘（可用）",
+            "bossName": "BOSS 直聘",
+            "lagou": "拉勾（即将开放）",
+            "zhilian": "智联招聘（即将开放）",
+            "51job": "51job（即将开放）"
+        },
+        "screening": {
+            "title": "AI 正在筛选合适职位",
+            "description": "正在理解你的条件并整理职位列表..."
+        },
+        "locked": {
+            "title": "升级至尊会员查看完整结果",
+            "description": "AI 已根据你的条件整理职位，升级至尊会员后即可清晰查看完整筛选结果。",
+            "upgrade": "升级至尊会员"
+        },
+        "jobsFound": "为你找到 {count} 个高匹配职位",
+        "editCriteria": "修改条件",
+        "jobs": {
+            "seniorProductManager": "高级产品经理",
+            "galaxyTech": "星河科技",
+            "hangzhouSalary": "杭州 · 20-40K",
+            "aiProduct": "AI 产品",
+            "bProduct": "B 端产品",
+            "experience5to10": "5-10 年",
+            "productLead": "产品负责人",
+            "cloudSail": "云帆智能",
+            "shanghaiSalary": "上海 · 25-45K",
+            "strategicPlanning": "战略规划",
+            "teamManagement": "团队管理",
+            "toB": "ToB",
+            "aiProductManager": "AI 产品经理",
+            "originLab": "原点实验室",
+            "beijingSalary": "北京 · 18-30K",
+            "largeModel": "大模型",
+            "userGrowth": "用户增长",
+            "experience0to1": "0-1"
+        },
+        "jd": { "viewMatch": "解析并查看匹配结果" },
+        "match": {
+            "summary": "JD 已解析 · 你的简历与该职位匹配度 {score}%",
+            "description": "优势关键词：AI 产品规划、跨团队协作、用户增长。接下来将根据该职位生成专属打招呼语。",
+            "generateGreeting": "生成个性化打招呼语"
+        },
+        "greeting": { "label": "给 {company} 的打招呼语", "confirm": "确认内容" },
+        "confirm": {
+            "description": "确认后将向 Boss 直聘逐个发送消息。",
+            "send": "确认并发送",
+            "upgrade": "升级后发送"
+        },
+        "sent": "已记录发送结果：等待 Boss 回复",
+        "supreme": {
+            "title": "至尊会员专享",
+            "description": "未开通至尊版时，AI 职位筛选结果会以模糊预览展示；升级后可查看完整结果、生成打招呼语并向 Boss 直聘发送。",
+            "upgrade": "升级至尊会员"
+        },
+        "records": { "title": "投递记录", "empty": "暂无投递记录" }
+    },
+    "membership": {
+        "title": "升级 VIP 会员",
+        "description": "解锁更多匹配次数与 AI 简历能力，让求职效率再进一步",
+        "upgrade": "升级 VIP",
+        "vipLabel": "VIP 会员",
+        "currentPlan": "当前方案：免费版",
+        "plansTitle": "选择会员方案",
+        "perMonth": "/月",
+        "basic": "基础版",
+        "advanced": "进阶版",
+        "pro": "专业版",
+        "basicDesc": "适合短期集中求职",
+        "advancedDesc": "覆盖完整求职周期",
+        "proDesc": "不限匹配，适合高频求职",
+        "supreme": "至尊版",
+        "supremeDesc": "智能投递 + Boss打招呼",
+        "deliveryFlow": "智能投递全流程",
+        "bossGreeting": "Boss 直聘打招呼",
+        "deliveryUnlimited": "智能筛选与投递记录",
+        "match30": "简历匹配 30 次",
+        "match100": "简历匹配 100 次",
+        "unlimitedMatch": "简历匹配不限次数",
+        "basicChat": "免费畅享 AI 简历助手基础聊天",
+        "resumeImage": "解锁 AI 简历助手图片功能",
+        "fileUpload": "解锁简历文件上传功能",
+        "recommended": "推荐",
+        "choosePlan": "选择方案",
+        "selected": "已选择",
+        "paymentTitle": "选择支付方式",
+        "wechat": "微信支付",
+        "alipay": "支付宝",
+        "bank": "银行卡",
+        "orderTitle": "订单摘要",
+        "membershipDuration": "会员周期",
+        "total": "应付金额",
+        "payNow": "立即支付",
+        "demoNotice": "支付功能正在接入中，当前仅展示前端购买流程。",
+        "paymentNotice": "选择支付方式后，点击立即支付进入确认流程。",
+        "paymentStarted": "已生成支付订单（演示）",
+        "securePayment": "安全支付 · 随时查看会员权益"
     },
     "settings": {
         "title": "设置",
@@ -97,8 +218,8 @@
         "githubLoginFailed": "GitHub 登录失败，请重试",
         "githubLoginSuccess": "GitHub 登录成功！",
         "registrationClosedTitle": "注册暂未开放",
-        "registrationClosedMessage": "目前仅支持 GitHub 账号登录，如需正式账号请联系 barrylong324@gmail.com",
-        "contactForAccount": "如需账号请联系 barrylong324@gmail.com"
+        "registrationClosedMessage": "注册功能暂未开放。已有账号可直接使用邮箱+密码+验证码登录，新用户可通过 GitHub 登录；如需正式账号请联系 barrylong324@gmail.com",
+        "contactForAccount": "注册暂未开放，如需账号请联系 barrylong324@gmail.com"
     },
     "dashboard": {
         "title": "仪表板",
@@ -108,6 +229,21 @@
             "avgScore": "平均匹配度",
             "thisMonth": "本月匹配",
             "highestScore": "最高匹配度"
+        },
+        "records": {
+            "demo": "演示数据",
+            "viewAll": "查看全部",
+            "aiUsage": {
+                "title": "AI 助手使用记录",
+                "source": "来自 AI 对话历史",
+                "empty": "暂无 AI 对话记录",
+                "noMessage": "暂无最近消息"
+            },
+            "recharge": {
+                "title": "会员充值记录",
+                "source": "充值接口接入中",
+                "empty": "暂无充值记录"
+            }
         }
     },
     "matching": {

@@ -91,6 +91,8 @@
 
     html {
         @apply font-sans;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC',
+            'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
     }
 }
 
@@ -207,7 +209,7 @@
     }
 
     .chat-markdown table {
-        @apply w-full text-sm border-collapse;
+        @apply w-full text-sm border-collapse border border-gray-200;
     }
 
     .chat-markdown thead {
@@ -215,11 +217,11 @@
     }
 
     .chat-markdown th {
-        @apply px-4 py-2.5 text-left font-semibold text-gray-700 whitespace-nowrap;
+        @apply border border-gray-200 px-4 py-2.5 text-left font-semibold text-gray-700 whitespace-nowrap;
     }
 
     .chat-markdown td {
-        @apply px-4 py-2.5 border-t border-gray-100 text-gray-700;
+        @apply border border-gray-200 px-4 py-2.5 text-gray-700;
     }
 
     .chat-markdown tbody tr:nth-child(even) {

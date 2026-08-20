@@ -270,18 +270,3 @@ export const deleteAiChatConversation = (conversationId: string) => {
         method: 'delete',
     })
 }
-
-/**
- * 获取 AI 模型用量
- */
-export interface ModelUsageInfo {
-    flash: { used: number; limit: number }
-    pro: { used: number; limit: number }
-}
-
-export const getAiChatUsage = () => {
-    return service({
-        url: '/ai-chat/usage',
-        method: 'get',
-    })
-}
