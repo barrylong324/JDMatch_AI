@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { Link, useRouter } from '@/navigation';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth-store';
 import { Button } from '@/components/ui/button';
@@ -66,6 +66,7 @@ function LoginForm() {
     const router = useRouter();
     const login = useAuthStore((state) => state.login);
     const t = useTranslations('auth');
+    const locale = useLocale();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -131,7 +132,9 @@ function LoginForm() {
     };
 
     const handleGitHubLogin = () => {
-        window.location.href = `${API_BASE_URL}/auth/github`;
+        // 带上当前域名和语言路径，GitHub 回调后原路跳回
+        const redirect = encodeURIComponent(`${window.location.origin}/${locale}/login`);
+        window.location.href = `${API_BASE_URL}/auth/github?redirect=${redirect}`;
     };
 
     return (
