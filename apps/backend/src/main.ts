@@ -21,7 +21,7 @@ import { ValidationPipe } from '@nestjs/common'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import helmet from 'helmet'
 import { AppModule } from './app.module'
-import { config, getPort, isDevelopment } from '@jd-match/config'
+import { getPort, isDevelopment, getCorsOrigins } from '@jd-match/config'
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter'
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor'
 
@@ -43,7 +43,7 @@ async function bootstrap() {
     }
 
     app.enableCors({
-        origin: config.NEXT_PUBLIC_APP_URL,
+        origin: getCorsOrigins(),
         credentials: true,
     })
 

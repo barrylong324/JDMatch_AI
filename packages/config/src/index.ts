@@ -58,6 +58,10 @@ const envSchema = z.object({
     NEXT_PUBLIC_APP_URL: z.string().url(),
     NEXT_PUBLIC_API_URL: z.string().url(),
 
+    // CORS 允许的前端来源（逗号分隔，可配置多个域名）
+    // 例：CORS_ORIGINS=https://a.example.com,https://b.example.com
+    CORS_ORIGINS: z.string().optional(),
+
     // Rate Limiting
     RATE_LIMIT_TTL: z.string().default('60'),
     RATE_LIMIT_MAX: z.string().default('100'),
@@ -95,3 +99,16 @@ export const isTest = config.NODE_ENV === 'test'
 export const getPort = () => parseInt(config.PORT, 10)
 export const getRateLimitTtl = () => parseInt(config.RATE_LIMIT_TTL, 10)
 export const getRateLimitMax = () => parseInt(config.RATE_LIMIT_MAX, 10)
+
+/**
+ * 获取 CORS 允许的来源列表
+ * 优先读 CORS_ORIGINS（逗号分隔），未配置时回退到 NEXT_PUBLIC_APP_URL
+ */
+export const getCorsOrigins = (): (string | RegExp)[] => {
+    const origins = config.CORS_ORIGINS
+        ? config.CORS_ORIGINS.split(',')
+              .map((origin) => origin.trim())
+              .filter(Boolean)
+        : [config.NEXT_PUBLIC_APP_URL]
+    return origins
+}
