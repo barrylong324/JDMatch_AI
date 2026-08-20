@@ -2,11 +2,9 @@
 
 import { Link } from '@/navigation';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 
 export default function LandingFooter() {
     const t = useTranslations('landing.footer');
-    const tAuth = useTranslations('auth');
 
     return (
         <footer className="py-8 px-6 bg-white border-t border-gray-200">
@@ -19,22 +17,12 @@ export default function LandingFooter() {
                     >
                         {t('login')}
                     </Link>
-                    <button
-                        type="button"
-                        className="text-sm text-gray-500 hover:text-black transition-colors cursor-pointer"
-                        onClick={() => {
-                            toast.info(tAuth('contactForAccount'), {
-                                duration: 8000,
-                                style: {
-                                    background: '#fff',
-                                    color: '#000',
-                                    border: '1px solid #d1d5db',
-                                },
-                            });
-                        }}
+                    <Link
+                        href="/register"
+                        className="text-sm text-gray-500 hover:text-black transition-colors"
                     >
                         {t('register')}
-                    </button>
+                    </Link>
                 </div>
             </div>
         </footer>

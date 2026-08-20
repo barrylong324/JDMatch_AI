@@ -248,22 +248,12 @@ function LoginForm() {
             <CardFooter className="flex flex-col">
                 <p className="text-sm text-center text-gray-600">
                     {t('noAccount')}
-                    <button
-                        type="button"
-                        className="font-medium text-black hover:text-gray-700 underline ml-1 cursor-pointer"
-                        onClick={() => {
-                            toast.info(t('contactForAccount'), {
-                                duration: 8000,
-                                style: {
-                                    background: '#fff',
-                                    color: '#000',
-                                    border: '1px solid #d1d5db',
-                                },
-                            });
-                        }}
+                    <Link
+                        href="/register"
+                        className="font-medium text-black hover:text-gray-700 underline ml-1"
                     >
                         {t('signUp')}
-                    </button>
+                    </Link>
                 </p>
             </CardFooter>
         </Card>
