@@ -9,6 +9,7 @@ import {
     Req,
     UseGuards,
     BadRequestException,
+    ForbiddenException,
 } from '@nestjs/common'
 import { ApiTags, ApiOperation } from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
@@ -16,7 +17,6 @@ import type { Response, Request } from 'express'
 import { AuthService } from './auth.service'
 import { CaptchaService } from './captcha.service'
 import { LoginDto } from './dto/login.dto'
-import { RegisterDto } from './dto/register.dto'
 import type { GitHubUserProfile } from './strategies/github.strategy'
 import { config } from '@jd-match/config'
 
@@ -58,17 +58,11 @@ export class AuthController {
     }
 
     @Post('register')
-    @ApiOperation({ summary: 'Register a new user' })
-    async register(@Body() registerDto: RegisterDto) {
-        // 先校验验证码
-        const captchaValid = this.captchaService.validate(
-            registerDto.captchaId,
-            registerDto.captcha,
-        )
-        if (!captchaValid) {
-            throw new BadRequestException('验证码错误或已过期')
-        }
-        return this.authService.register(registerDto)
+    @ApiOperation({ summary: 'Register a new user (disabled)' })
+    async register() {
+        // 注册已关闭：正式环境不允许自助注册，避免 API 被滥用
+        // 已有账号仍可通过 POST /auth/login 使用邮箱+密码+验证码登录
+        throw new ForbiddenException('注册暂未开放，如需账号请联系 barrylong324@gmail.com')
     }
 
     /**

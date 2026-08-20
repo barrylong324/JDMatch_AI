@@ -300,8 +300,17 @@ export default function MatchingDetailPage() {
                     {detail.assistantMessage ? (
                         <>
                             <ScoreCharts analysisText={detail.assistantMessage} />
-                            <div className="prose prose-gray max-w-none prose-headings:text-black prose-h2:text-xl prose-h2:font-bold prose-h3:text-lg prose-h3:font-semibold prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-black prose-table:text-sm">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            <div className="chat-markdown prose prose-gray max-w-none prose-headings:text-black prose-h2:text-xl prose-h2:font-bold prose-h3:text-lg prose-h3:font-semibold prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-black prose-table:text-sm">
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                        table: ({ children }) => (
+                                            <div className="table-wrapper">
+                                                <table>{children}</table>
+                                            </div>
+                                        ),
+                                    }}
+                                >
                                     {detail.assistantMessage}
                                 </ReactMarkdown>
                             </div>

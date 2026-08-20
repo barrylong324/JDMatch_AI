@@ -1,19 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { useAuthStore } from '@/stores/auth-store';
-import { Target, Star, Calendar, TrendingUp } from 'lucide-react';
+import { Target, Star, Calendar, TrendingUp, Bot, CreditCard, ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { getMatchingAllMessage } from '@/lib/requestModule/request-bus';
+import { getAiChatConversations, getMatchingAllMessage } from '@/lib/requestModule/request-bus';
 
 interface Stats {
     totalMatchings: number;
     avgScore: number;
     thisMonth: number;
     highestScore: number;
+}
+
+interface AiUsageRecord {
+    id: string;
+    title: string;
+    updatedAt: string;
 }
 
 export default function DashboardPage() {
@@ -26,6 +32,7 @@ export default function DashboardPage() {
         highestScore: 0,
     });
     const [loading, setLoading] = useState(true);
+    const [aiUsageRecords, setAiUsageRecords] = useState<AiUsageRecord[]>([]);
     const t = useTranslations('dashboard');
 
     useEffect(() => {
@@ -43,6 +50,14 @@ export default function DashboardPage() {
                 thisMonth: total,
                 highestScore: 0,
             });
+
+            try {
+                const aiChatRes = await getAiChatConversations(1, 50);
+                setAiUsageRecords(aiChatRes?.data?.result?.conversations || []);
+            } catch (error) {
+                console.error('Failed to load AI chat history:', error);
+                setAiUsageRecords([]);
+            }
         } catch (error) {
             console.error('Failed to load stats:', error);
         } finally {
@@ -122,6 +137,69 @@ export default function DashboardPage() {
                         </Card>
                     );
                 })}
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <Card className="border-gray-200">
+                    <CardContent className="p-0">
+                        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+                            <div className="flex items-center gap-3">
+                                <div className="rounded-md bg-gray-100 p-2.5">
+                                    <Bot className="h-5 w-5 text-gray-700" />
+                                </div>
+                                <div>
+                                    <h2 className="font-semibold text-black">{t('records.aiUsage.title')}</h2>
+                                    <p className="mt-0.5 text-xs text-gray-500">{t('records.aiUsage.source')}</p>
+                                </div>
+                            </div>
+                            <Button variant="ghost" size="sm" className="text-gray-500" onClick={() => router.push('/dashboard/ai-assistant')}>
+                                {t('records.viewAll')}
+                                <ChevronRight className="ml-1 h-4 w-4" />
+                            </Button>
+                        </div>
+                        {aiUsageRecords.length === 0 ? (
+                            <div className="flex min-h-28 items-center justify-center px-5 py-4 text-center">
+                                <p className="text-sm text-gray-500">{t('records.aiUsage.empty')}</p>
+                            </div>
+                        ) : (
+                            <div className="divide-y divide-gray-100">
+                                {aiUsageRecords.map((record) => (
+                                    <div key={record.id} className="flex items-center justify-between gap-4 px-5 py-4">
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-medium text-black">{record.title}</p>
+                                        </div>
+                                        <time className="flex-shrink-0 text-xs text-gray-400">
+                                            {new Date(record.updatedAt).toLocaleString()}
+                                        </time>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card className="border-gray-200">
+                    <CardContent className="p-0">
+                        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+                            <div className="flex items-center gap-3">
+                                <div className="rounded-md bg-gray-100 p-2.5">
+                                    <CreditCard className="h-5 w-5 text-gray-700" />
+                                </div>
+                                <div>
+                                    <h2 className="font-semibold text-black">{t('records.recharge.title')}</h2>
+                                    <p className="mt-0.5 text-xs text-gray-500">{t('records.recharge.source')}</p>
+                                </div>
+                            </div>
+                            <Button variant="ghost" size="sm" className="text-gray-500" onClick={() => router.push('/dashboard/membership')}>
+                                {t('records.viewAll')}
+                                <ChevronRight className="ml-1 h-4 w-4" />
+                            </Button>
+                        </div>
+                        <div className="flex min-h-28 items-center justify-center px-5 py-4 text-center">
+                            <p className="text-sm text-gray-500">{t('records.recharge.empty')}</p>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );

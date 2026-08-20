@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 /**
  * 注册页面 - 暂时关闭
- * 目前仅支持 GitHub OAuth 登录，如需账号请联系管理员
+ * 登录支持：GitHub OAuth / 已有账号邮箱+密码+验证码
+ * 注册暂未开放，如需账号请联系管理员 barrylong324@gmail.com
  */
 export default function RegisterPage() {
     const t = useTranslations('auth');

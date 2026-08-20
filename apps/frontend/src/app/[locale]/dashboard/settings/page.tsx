@@ -8,7 +8,6 @@ import { Card, CardContent } from '@/components/ui/card';
 export default function SettingsPage() {
     const { user } = useAuthStore();
     const t = useTranslations('settings');
-    const tCommon = useTranslations('common');
 
     return (
         <div className="space-y-6">
@@ -54,26 +53,6 @@ export default function SettingsPage() {
                                     {user?.role || 'USER'}
                                 </p>
                             </div>
-                        </div>
-                    </div>
-                </CardContent>
-
-                {/* API Configuration */}
-                <CardContent className="p-6">
-                    <h3 className="text-lg font-medium text-black mb-4">
-                        {t('api.title')}
-                    </h3>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                {t('api.apiKey')}
-                            </label>
-                            <input
-                                type="text"
-                                value={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
-                                readOnly
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
-                            />
                         </div>
                     </div>
                 </CardContent>

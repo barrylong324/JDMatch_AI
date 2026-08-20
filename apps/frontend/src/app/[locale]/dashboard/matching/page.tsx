@@ -30,7 +30,7 @@ export default function MatchingPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // ---- JD 输入状态 ----
-    const [jdMode, setJdMode] = useState<JdInputMode>('url');
+    const [jdMode, setJdMode] = useState<JdInputMode>('text');
     const [jdUrl, setJdUrl] = useState('');
     const [jdContent, setJdContent] = useState('');
 
@@ -254,16 +254,6 @@ export default function MatchingPage() {
                         {/* Tab 切换 */}
                         <div className="flex gap-1 mb-4 p-1 bg-gray-100 rounded-lg">
                             <button
-                                onClick={() => setJdMode('url')}
-                                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${jdMode === 'url'
-                                    ? 'bg-white text-black shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
-                                    }`}
-                            >
-                                <Link className="h-4 w-4" />
-                                {t('jdTabUrl')}
-                            </button>
-                            <button
                                 onClick={() => setJdMode('text')}
                                 className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${jdMode === 'text'
                                     ? 'bg-white text-black shadow-sm'
@@ -272,6 +262,16 @@ export default function MatchingPage() {
                             >
                                 <ClipboardPaste className="h-4 w-4" />
                                 {t('jdTabText')}
+                            </button>
+                            <button
+                                onClick={() => setJdMode('url')}
+                                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${jdMode === 'url'
+                                    ? 'bg-white text-black shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                            >
+                                <Link className="h-4 w-4" />
+                                {t('jdTabUrl')}
                             </button>
                         </div>
 
@@ -360,8 +360,17 @@ export default function MatchingPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="p-6">
-                            <div className="prose prose-gray max-w-none prose-headings:text-black prose-h2:text-xl prose-h2:font-bold prose-h3:text-lg prose-h3:font-semibold prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-black prose-table:text-sm">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            <div className="chat-markdown prose prose-gray max-w-none prose-headings:text-black prose-h2:text-xl prose-h2:font-bold prose-h3:text-lg prose-h3:font-semibold prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-black prose-table:text-sm">
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                        table: ({ children }) => (
+                                            <div className="table-wrapper">
+                                                <table>{children}</table>
+                                            </div>
+                                        ),
+                                    }}
+                                >
                                     {analysisText}
                                 </ReactMarkdown>
                             </div>

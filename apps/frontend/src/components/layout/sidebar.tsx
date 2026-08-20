@@ -1,7 +1,7 @@
 'use client';
 
 import { Link, usePathname } from '@/navigation';
-import { Home, Target, Bot, History, Settings } from 'lucide-react';
+import { Home, Target, Bot, History, Settings, Crown, Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export default function Sidebar() {
@@ -13,6 +13,8 @@ export default function Sidebar() {
         { name: t('aiAssistant'), href: '/dashboard/ai-assistant', icon: Bot },
         { name: t('matching'), href: '/dashboard/matching', icon: Target },
         { name: t('history'), href: '/dashboard/history', icon: History },
+        { name: t('smartDelivery'), href: '/dashboard/smart-delivery', icon: Send },
+        { name: t('membership'), href: '/dashboard/membership', icon: Crown },
         { name: t('settings'), href: '/dashboard/settings', icon: Settings },
     ];
 

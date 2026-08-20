@@ -2,7 +2,7 @@
 
 import { useAuthStore } from '@/stores/auth-store';
 import { useRouter } from '@/navigation';
-import { LogOut, User } from 'lucide-react';
+import { Crown, LogOut, User } from 'lucide-react';
 import LanguageSwitcher from './language-switcher';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,8 @@ export default function Navbar() {
     const router = useRouter();
     const { user, logout } = useAuthStore();
     const t = useTranslations('auth');
+    const tMembership = useTranslations('membership');
+    const isVip = user?.role?.toUpperCase() === 'VIP';
 
     const handleLogout = () => {
         logout();
@@ -30,6 +32,21 @@ export default function Navbar() {
                     <div className="flex items-center space-x-2">
                         <User className="h-5 w-5 text-gray-600" />
                         <span className="text-sm text-gray-700">{user?.name}</span>
+                        {isVip ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">
+                                <Crown className="h-3.5 w-3.5" />
+                                {tMembership('vipLabel')}
+                            </span>
+                        ) : (
+                            <Button
+                                onClick={() => router.push('/dashboard/membership')}
+                                size="sm"
+                                className="h-8 bg-amber-500 px-3 text-xs text-white hover:bg-amber-600"
+                            >
+                                <Crown className="mr-1.5 h-3.5 w-3.5" />
+                                {tMembership('upgrade')}
+                            </Button>
+                        )}
                     </div>
 
                     <Button

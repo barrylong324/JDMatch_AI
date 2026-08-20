@@ -1,9 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
-
-// 加载 Google Inter 字体，子集为 latin（英文字符集）
-const inter = Inter({ subsets: ['latin'] });
 
 // 页面元数据，用于 SEO 和浏览器标签页标题 生成<title>和<meta>标签
 export const metadata: Metadata = {
@@ -21,7 +17,7 @@ export default function RootLayout({
             <head>
                 <link rel="alternate icon" href="/favicon.ico" />
             </head>
-            <body className={inter.className}>{children}</body>
+            <body>{children}</body>
         </html>
     );
 }
